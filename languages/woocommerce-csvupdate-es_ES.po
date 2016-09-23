@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Woocommerce CSV Import\n"
-"POT-Creation-Date: 2016-09-22 12:58-0300\n"
-"PO-Revision-Date: 2016-09-22 12:58-0300\n"
+"POT-Creation-Date: 2016-09-23 12:35-0300\n"
+"PO-Revision-Date: 2016-09-23 12:36-0300\n"
 "Last-Translator: Allaerd Mensonides <info@allaerd.org>\n"
 "Language-Team: Nahuel José <nahuel@nahueljose.com.ar>\n"
 "Language: es\n"
@@ -18,33 +18,57 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: admin/admin.php:7 admin/admin.php:8 woocommerce-csvupdate-do.php:32
+#: admin/admin.php:7 admin/admin.php:8 woocommerce-csvupdate-do.php:144
 msgid "CSV Update"
 msgstr "Actualizar de CSV"
 
-#: woocommerce-csvupdate-do.php:36
+#: woocommerce-csvupdate-do.php:96
+msgid "Price"
+msgstr "Precio"
+
+#: woocommerce-csvupdate-do.php:97
+msgid "Stock"
+msgstr "Existencias"
+
+#: woocommerce-csvupdate-do.php:136
+msgid "There was an error uploading the file."
+msgstr "Ocurrió un error subiendo el archivo."
+
+#: woocommerce-csvupdate-do.php:141
+#, php-format
+msgid ""
+"<strong>%s</strong> products were updated. <strong>%s</strong> were ignored."
+msgstr ""
+"Se actualizaron <strong>%s</strong> productos. Se ignoraron <strong>%s</"
+"strong>."
+
+#: woocommerce-csvupdate-do.php:148
 msgid "CSV Delimiter"
 msgstr "Delimitador CSV"
 
-#: woocommerce-csvupdate-do.php:40
+#: woocommerce-csvupdate-do.php:152
 msgid "SKU Column"
 msgstr "Columna Cod. de Artículo"
 
-#: woocommerce-csvupdate-do.php:44
+#: woocommerce-csvupdate-do.php:156
 msgid "Price Column"
 msgstr "Columna de Precio"
 
-#: woocommerce-csvupdate-do.php:48
+#: woocommerce-csvupdate-do.php:160
 msgid "Stock Column"
 msgstr "Columna de Stock"
 
-#: woocommerce-csvupdate-do.php:53
+#: woocommerce-csvupdate-do.php:165
 msgid "CSV File"
 msgstr "Archivo CSV"
 
-#: woocommerce-csvupdate-do.php:59
+#: woocommerce-csvupdate-do.php:171
 msgid "Run"
 msgstr "Ejecutar"
+
+#: woocommerce-csvupdate-do.php:177
+msgid "Log"
+msgstr "Registro"
 
 #~ msgid "Products update from CSV"
 #~ msgstr "Actualizar productos desde CSV"

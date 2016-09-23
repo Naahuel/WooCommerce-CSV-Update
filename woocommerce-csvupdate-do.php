@@ -93,8 +93,8 @@ if( isset($_GET['do-it']) ){
 					$_log .= "-----------------------------------------------------------";
 					$_log .= "-----------------------------------------------------------------------------\n";
 					$_log .= $_product->post->post_title . "\n";
-					$_log .= "Precio: $" . $_product->get_price() . " ---> $" . $precio . " | ";
-					$_log .= "Stock: " . $_product->get_stock_quantity() . " ---> " . $stock . "\n";
+					$_log .= __('Price', 'woocommerce-csvupdate') . ": $" . $_product->get_price() . " ---> $" . $precio . " | ";
+					$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $_product->get_stock_quantity() . " ---> " . $stock . "\n";
 					$_log .= "-----------------------------------------------------------";
 					$_log .= "-----------------------------------------------------------------------------\n";
 					// Actualizar precio
@@ -133,11 +133,12 @@ if( isset($_GET['do-it']) ){
 	</style>
 
 	<?php if( isset( $upload_error ) && $upload_error ): ?>
-		<div id="message" class="error notice is-dismissible"><p>Ocurrió un error subiendo el archivo.</p></div>
+		<div id="message" class="error notice is-dismissible"><p><?php _e('There was an error uploading the file.', 'woocommerce-csvupdate'); ?></p></div>
 	<?php endif; ?>
 
 	<?php if( isset( $exito ) && $exito ): ?>
-		<div id="message" class="updated notice is-dismissible"><p>Se actualizaron <strong><?php echo $importados; ?></strong> productos y se ignoraron <strong ><?php echo $no_importados; ?></strong> </p></div>
+		<div id="message" class="updated notice is-dismissible"><p>
+			<?php echo sprintf( __('<strong>%s</strong> products were updated. <strong>%s</strong> were ignored.', 'woocommerce-csvupdate' ), $importados, $no_importados ); ?></p></div>
 	<?php endif; ?>
 
 <h1><?php _e('CSV Update', 'woocommerce-csvupdate'); ?></h1>
@@ -173,7 +174,7 @@ if( isset($_GET['do-it']) ){
 </form>
 
 <?php if( isset( $_log ) ): ?>
-	<h2>Registro: </h2>
+	<h2><?php _e('Log', 'woocommerce-csvupdate'); ?>:</h2>
 <textarea rows="8" cols="40" class="widefat" style="height:500px"><?php echo $_log; ?></textarea>
 <?php endif; ?>
 
