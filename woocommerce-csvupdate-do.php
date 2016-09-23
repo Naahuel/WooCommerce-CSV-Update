@@ -18,9 +18,9 @@ if( isset($_GET['do-it']) ){
 	// :: Obtener options
 	//--------------------------------------------------------------
 	$csv_delimiter = get_option( 'woocommerce-csvupdate-csv-delimiter', trim($_POST['csv-delimiter']) );
-	$column_sku    = 1 - intval( get_option( 'woocommerce-csvupdate-column-sku',    intval($_POST['column-sku']) ) );
-	$column_price  = 1 - intval( get_option( 'woocommerce-csvupdate-column-price',  intval($_POST['column-price']) ) );
-	$column_stock  = 1 - intval( get_option( 'woocommerce-csvupdate-column-stock',  intval($_POST['column-stock']) ) );
+	$column_sku    = intval( get_option( 'woocommerce-csvupdate-column-sku',    intval($_POST['column-sku']) ) ) - 1;
+	$column_price  = intval( get_option( 'woocommerce-csvupdate-column-price',  intval($_POST['column-price']) ) ) - 1;
+	$column_stock  = intval( get_option( 'woocommerce-csvupdate-column-stock',  intval($_POST['column-stock']) ) ) - 1;
 
 	//--------------------------------------------------------------
 	// :: Subir archivo
@@ -53,6 +53,9 @@ if( isset($_GET['do-it']) ){
 		// Se subió el archivo, algo hicimos
 		$exito = true;
 
+		// Iniciar LOG
+		$_log = '';
+
 		// Leo el archivo a un array
 		$hw_file = file( $target_file );
 		$num_linea = 0;
@@ -71,8 +74,12 @@ if( isset($_GET['do-it']) ){
 				continue;
 			}
 
+			// Nuevos valores para el productow
+			$sku 		= trim($csv_linea[ $column_sku ]);
+			$precio = trim($csv_linea[ $column_price ]);
+			$stock  = trim($csv_linea[ $column_stock ]);
+
 			// Busco el producto por SKU
-			$sku = trim($csv_linea[ $column_sku ]);
 			if ($sku) {
 
 				$product_id = wc_get_product_id_by_sku( $sku );
@@ -80,8 +87,20 @@ if( isset($_GET['do-it']) ){
 				if( $product_id ){
 					// El producto existe
 					$importados++;
+					// Obtener producto
 					$_product = wc_get_product( $product_id );
-					echo $_product->get_price();
+					// Log info
+					$_log .= "-----------------------------------------------------------";
+					$_log .= "-----------------------------------------------------------------------------\n";
+					$_log .= $_product->post->post_title . "\n";
+					$_log .= "Precio: $" . $_product->get_price() . " ---> $" . $precio . " | ";
+					$_log .= "Stock: " . $_product->get_stock_quantity() . " ---> " . $stock . "\n";
+					$_log .= "-----------------------------------------------------------";
+					$_log .= "-----------------------------------------------------------------------------\n";
+					// Actualizar precio
+					wcsvu_change_product_price( $product_id, $precio );
+					// Actualizar stock
+					wc_update_product_stock( $product_id, $stock );
 
 				} else {
 					// El producto no existe
@@ -152,4 +171,10 @@ if( isset($_GET['do-it']) ){
 		</button>
 	</p>
 </form>
+
+<?php if( isset( $_log ) ): ?>
+	<h2>Registro: </h2>
+<textarea rows="8" cols="40" class="widefat" style="height:500px"><?php echo $_log; ?></textarea>
+<?php endif; ?>
+
 </div> <!--.wrap-->
