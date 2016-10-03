@@ -76,7 +76,7 @@ if( isset($_GET['do-it']) ){
 
 			// Nuevos valores para el productow
 			$sku 		= trim($csv_linea[ $column_sku ]);
-			$precio = trim($csv_linea[ $column_price ]);
+			$precio = str_replace('.',',',trim($csv_linea[ $column_price ]));
 			$stock  = trim($csv_linea[ $column_stock ]);
 
 			// Busco el producto por SKU
