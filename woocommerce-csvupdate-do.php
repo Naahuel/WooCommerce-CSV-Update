@@ -1,5 +1,4 @@
 <?php
-// var_dump($_POST);
 if( isset($_GET['do-it']) ){
 
 	//--------------------------------------------------------------
@@ -13,6 +12,12 @@ if( isset($_GET['do-it']) ){
 		{ update_option( 'woocommerce-csvupdate-column-price', intval($_POST['column-price']) ); }
 	if( isset( $_POST['column-stock'] ) )
 		{ update_option( 'woocommerce-csvupdate-column-stock', intval($_POST['column-stock']) ); }
+	if( isset( $_POST['apply-discount'] ) )
+		{ update_option( 'woocommerce-csvupdate-apply-discount', intval($_POST['apply-discount']) ); }
+	else
+		{ update_option( 'woocommerce-csvupdate-apply-discount', 0 ); }
+	if( isset( $_POST['discount'] ) )
+		{ update_option( 'woocommerce-csvupdate-discount', intval($_POST['discount']) ); }
 
 	//--------------------------------------------------------------
 	// :: Obtener options
@@ -21,6 +26,8 @@ if( isset($_GET['do-it']) ){
 	$column_sku    = intval( get_option( 'woocommerce-csvupdate-column-sku',    intval($_POST['column-sku']) ) ) - 1;
 	$column_price  = intval( get_option( 'woocommerce-csvupdate-column-price',  intval($_POST['column-price']) ) ) - 1;
 	$column_stock  = intval( get_option( 'woocommerce-csvupdate-column-stock',  intval($_POST['column-stock']) ) ) - 1;
+	$apply_discount  = intval( get_option( 'woocommerce-csvupdate-apply-discount',  intval($_POST['apply-discount']) ) );
+	$discount  			= floatval( get_option( 'woocommerce-csvupdate-discount',  floatval($_POST['discount']) ) );
 
 	//--------------------------------------------------------------
 	// :: Subir archivo
@@ -75,9 +82,17 @@ if( isset($_GET['do-it']) ){
 			}
 
 			// Nuevos valores para el productow
-			$sku 		= trim($csv_linea[ $column_sku ]);
-			$precio = str_replace('.',',',trim($csv_linea[ $column_price ]));
-			$stock  = trim($csv_linea[ $column_stock ]);
+			$sku 							= trim($csv_linea[ $column_sku ]);
+			$precio 					= str_replace('.',',',trim($csv_linea[ $column_price ]));
+			$precio_descuento = $precio;
+			$stock  					= trim($csv_linea[ $column_stock ]);
+
+			// Aplica descuento?
+			if( $apply_discount ){
+				$__precio = floatval( trim($csv_linea[ $column_price ]) );
+				$precio_descuento = ( (100-$discount)/100 )*$__precio;
+				$precio_descuento = str_replace('.',',', $precio_descuento);
+			}
 
 			// Busco el producto por SKU
 			if ($sku) {
@@ -94,11 +109,16 @@ if( isset($_GET['do-it']) ){
 					$_log .= "-----------------------------------------------------------------------------\n";
 					$_log .= $_product->post->post_title . "\n";
 					$_log .= __('Price', 'woocommerce-csvupdate') . ": $" . $_product->get_price() . " ---> $" . $precio . " | ";
+					$_log .= __('Sale Price', 'woocommerce-csvupdate') . ": $" . $_product->get_sale_price() . " ---> $" . $precio_descuento . " | ";
 					$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $_product->get_stock_quantity() . " ---> " . $stock . "\n";
 					$_log .= "-----------------------------------------------------------";
 					$_log .= "-----------------------------------------------------------------------------\n";
 					// Actualizar precio
 					wcsvu_change_product_price( $product_id, $precio );
+					// Aplica descuento?
+					if( $apply_discount ){
+						wcsvu_change_price_by_type( $product_id, $precio_descuento ,'sale_price' );
+					}
 					// Actualizar stock
 					wc_update_product_stock( $product_id, $stock );
 
@@ -159,6 +179,11 @@ if( isset($_GET['do-it']) ){
 	<p>
 		<label class="woocommerce-csvupdate-label" for="column-stock"><?php _e('Stock Column', 'woocommerce-csvupdate'); ?></label>
 		<input class="woocommerce-csvupdate-input" type="text" name="column-stock" id="column-stock" value="<?php echo get_option( 'woocommerce-csvupdate-column-stock', '11' ); ?>">
+	</p>
+	<p>
+		<label class="woocommerce-csvupdate-label" for="apply-discount"><?php _e('Apply discount in % to all products?', 'woocommerce-csvupdate'); ?></label>
+		<input class="woocommerce-csvupdate-input" type="checkbox" name="apply-discount" id="apply-discount" value="1" <?php if( get_option( 'woocommerce-csvupdate-apply-discount', '0' ) == '1' ){ echo 'checked="checked"'; }; ?>>
+		<input class="woocommerce-csvupdate-input" type="number" name="discount" id="discount" value="<?php echo get_option( 'woocommerce-csvupdate-discount', '0' ); ?>"> %
 	</p>
 	<hr>
 	<p>
