@@ -83,7 +83,7 @@ if( isset($_GET['do-it']) ){
 
 			// Nuevos valores para el productow
 			$sku 							= trim($csv_linea[ $column_sku ]);
-			$precio 					= str_replace('.',',',trim($csv_linea[ $column_price ]));
+			$precio 					= str_replace(',','.',trim($csv_linea[ $column_price ]));
 			$precio_descuento = $precio;
 			$stock  					= trim($csv_linea[ $column_stock ]);
 
@@ -91,7 +91,7 @@ if( isset($_GET['do-it']) ){
 			if( $apply_discount ){
 				$__precio = floatval( trim($csv_linea[ $column_price ]) );
 				$precio_descuento = ( (100-$discount)/100 )*$__precio;
-				$precio_descuento = str_replace('.',',', $precio_descuento);
+				$precio_descuento = str_replace(',','.', $precio_descuento);
 			}
 
 			// Busco el producto por SKU
@@ -114,10 +114,13 @@ if( isset($_GET['do-it']) ){
 					$_log .= "-----------------------------------------------------------";
 					$_log .= "-----------------------------------------------------------------------------\n";
 					// Actualizar precio
-					wcsvu_change_product_price( $product_id, $precio );
 					// Aplica descuento?
 					if( $apply_discount ){
+						wcsvu_change_price_by_type( $product_id, $precio_descuento ,'price' );
+						wcsvu_change_price_by_type( $product_id, $precio ,'regular_price' );
 						wcsvu_change_price_by_type( $product_id, $precio_descuento ,'sale_price' );
+					} else {
+						wcsvu_change_product_price( $product_id, $precio );
 					}
 					// Actualizar stock
 					wc_update_product_stock( $product_id, $stock );
