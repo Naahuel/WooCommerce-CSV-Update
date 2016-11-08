@@ -178,9 +178,9 @@ if( isset($_GET['do-it']) ){
 							$subcat_id = $subcat_obj->term_id;
 						} else {
 							// La categoría no existe
-							if( $subcategory ){
-								// Crear categoria
-								$subcat_obj = wp_insert_term( $subcategory, 'product_cat' );
+							if( $subcategory && $cat_id ){
+								// Crear sub-categoria sólo si la categoría existe
+								$subcat_obj = wp_insert_term( $subcategory, 'product_cat', array( 'parent' => $cat_id ) );
 								$subcat_id = $subcat_obj->term_id;
 							}
 						}
@@ -210,7 +210,7 @@ if( isset($_GET['do-it']) ){
 						update_post_meta( $newproduct_id, 'total_sales', '0');
 						update_post_meta( $newproduct_id, '_downloadable', 'no');
 						update_post_meta( $newproduct_id, '_virtual', 'no');
-						update_post_meta($post_id, '_sku', $sku);
+						update_post_meta( $newproduct_id, '_sku', $sku);
 
 						// Actualizar precio
 						// Aplica descuento?
