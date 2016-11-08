@@ -1,4 +1,5 @@
 <?php
+
 if( isset($_GET['do-it']) ){
 
 	//--------------------------------------------------------------
@@ -12,10 +13,20 @@ if( isset($_GET['do-it']) ){
 		{ update_option( 'woocommerce-csvupdate-column-price', intval($_POST['column-price']) ); }
 	if( isset( $_POST['column-stock'] ) )
 		{ update_option( 'woocommerce-csvupdate-column-stock', intval($_POST['column-stock']) ); }
+	if( isset( $_POST['column-title'] ) )
+		{ update_option( 'woocommerce-csvupdate-column-title', intval($_POST['column-title']) ); }
+	if( isset( $_POST['column-category'] ) )
+		{ update_option( 'woocommerce-csvupdate-column-category', intval($_POST['column-category']) ); }
+	if( isset( $_POST['column-subcategory'] ) )
+		{ update_option( 'woocommerce-csvupdate-column-subcategory', intval($_POST['column-subcategory']) ); }
 	if( isset( $_POST['apply-discount'] ) )
 		{ update_option( 'woocommerce-csvupdate-apply-discount', intval($_POST['apply-discount']) ); }
 	else
 		{ update_option( 'woocommerce-csvupdate-apply-discount', 0 ); }
+	if( isset( $_POST['insert-new'] ) )
+		{ update_option( 'woocommerce-csvupdate-insert-new', intval($_POST['insert-new']) ); }
+	else
+		{ update_option( 'woocommerce-csvupdate-insert-new', 0 ); }
 	if( isset( $_POST['discount'] ) )
 		{ update_option( 'woocommerce-csvupdate-discount', intval($_POST['discount']) ); }
 
@@ -23,11 +34,15 @@ if( isset($_GET['do-it']) ){
 	// :: Obtener options
 	//--------------------------------------------------------------
 	$csv_delimiter = get_option( 'woocommerce-csvupdate-csv-delimiter', trim($_POST['csv-delimiter']) );
-	$column_sku    = intval( get_option( 'woocommerce-csvupdate-column-sku',    intval($_POST['column-sku']) ) ) - 1;
-	$column_price  = intval( get_option( 'woocommerce-csvupdate-column-price',  intval($_POST['column-price']) ) ) - 1;
-	$column_stock  = intval( get_option( 'woocommerce-csvupdate-column-stock',  intval($_POST['column-stock']) ) ) - 1;
-	$apply_discount  = intval( get_option( 'woocommerce-csvupdate-apply-discount',  intval($_POST['apply-discount']) ) );
-	$discount  			= floatval( get_option( 'woocommerce-csvupdate-discount',  floatval($_POST['discount']) ) );
+	$column_sku   			= intval( get_option( 'woocommerce-csvupdate-column-sku',    intval($_POST['column-sku']) ) ) - 1;
+	$column_price 			= intval( get_option( 'woocommerce-csvupdate-column-price',  intval($_POST['column-price']) ) ) - 1;
+	$column_stock  			= intval( get_option( 'woocommerce-csvupdate-column-stock',  intval($_POST['column-stock']) ) ) - 1;
+	$column_title  			= intval( get_option( 'woocommerce-csvupdate-column-title',  intval($_POST['column-stock']) ) ) - 1;
+	$column_category  	= intval( get_option( 'woocommerce-csvupdate-column-category',  intval($_POST['column-stock']) ) ) - 1;
+	$column_subcategory	= intval( get_option( 'woocommerce-csvupdate-column-subcategory',  intval($_POST['column-stock']) ) ) - 1;
+	$apply_discount   = intval( get_option( 'woocommerce-csvupdate-apply-discount',  intval($_POST['apply-discount']) ) );
+	$insert_new		 		= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval($_POST['insert-new']) ) );
+	$discount  		 		= floatval( get_option( 'woocommerce-csvupdate-discount',  floatval($_POST['discount']) ) );
 
 	//--------------------------------------------------------------
 	// :: Subir archivo
@@ -66,8 +81,9 @@ if( isset($_GET['do-it']) ){
 		// Leo el archivo a un array
 		$hw_file = file( $target_file );
 		$num_linea = 0;
-		$importados = 0;
-		$no_importados = 0;
+		$productos_actualizados = 0;
+		$productos_no_importados = 0;
+		$productos_nuevos = 0;
 
 		// Recorro linea a línea y convierto a array el CSV
 		foreach ($hw_file as $linea) {
@@ -86,6 +102,9 @@ if( isset($_GET['do-it']) ){
 			$precio 					= str_replace(',','.',trim($csv_linea[ $column_price ]));
 			$precio_descuento = $precio;
 			$stock  					= trim($csv_linea[ $column_stock ]);
+			$title  					= trim($csv_linea[ $column_title ]);
+			$category 				= trim($csv_linea[ $column_category ]);
+			$subcategory			= trim($csv_linea[ $column_subcategory ]);
 
 			// Aplica descuento?
 			if( $apply_discount ){
@@ -96,18 +115,22 @@ if( isset($_GET['do-it']) ){
 
 			// Busco el producto por SKU
 			if ($sku) {
-
+				// Obtengo el ID del producto
 				$product_id = wc_get_product_id_by_sku( $sku );
 
 				if( $product_id ){
 					// El producto existe
-					$importados++;
+					//-------------------------------------------------
+					// ACTUALIZAR
+					//-------------------------------------------------
+					$productos_actualizados++;
 					// Obtener producto
 					$_product = wc_get_product( $product_id );
+
 					// Log info
-					$_log .= "-----------------------------------------------------------";
+					$_log .= "ACTUALIZADO -----------------------------------------------------------";
 					$_log .= "-----------------------------------------------------------------------------\n";
-					$_log .= $_product->post->post_title . "\n";
+					$_log .= "(".$sku.") :: " . $_product->post->post_title . "\n";
 					$_log .= __('Price', 'woocommerce-csvupdate') . ": $" . $_product->get_price() . " ---> $" . $precio . " | ";
 					$_log .= __('Sale Price', 'woocommerce-csvupdate') . ": $" . $_product->get_sale_price() . " ---> $" . $precio_descuento . " | ";
 					$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $_product->get_stock_quantity() . " ---> " . $stock . "\n";
@@ -127,13 +150,100 @@ if( isset($_GET['do-it']) ){
 
 				} else {
 					// El producto no existe
-					$no_importados++;
-				}
+					if( $stock && $insert_new ){
+						// El producto nuevo tiene stock y se pidió agregar nuevos
+						//-------------------------------------------------
+						// INSERTAR
+						//-------------------------------------------------
 
-				// DEBUG: cortar en 50
-				// if( $num_linea == 2 ){
-				// 	// break;
-				// }
+						// Obtengo la categoría
+						$cat_id = false;
+						$cat_obj = get_term_by('name', $category, 'product_cat');
+						if( $cat_obj ){
+							// La categoría ya existe
+							$cat_id = $cat_obj->term_id;
+						} else {
+							// La categoría no existe
+							if( $category ){
+								// Crear categoria
+								$cat_obj = wp_insert_term( $category, 'product_cat' );
+								$cat_id = $cat_obj->term_id;
+							}
+						}
+						// Obtengo la SUB categoría
+						$subcat_id = false;
+						$subcat_obj = get_term_by('name', $subcategory, 'product_cat');
+						if( $subcat_obj ){
+							// La categoría ya existe
+							$subcat_id = $subcat_obj->term_id;
+						} else {
+							// La categoría no existe
+							if( $subcategory ){
+								// Crear categoria
+								$subcat_obj = wp_insert_term( $subcategory, 'product_cat' );
+								$subcat_id = $subcat_obj->term_id;
+							}
+						}
+
+						// Creo el producto
+						$post = array(
+					    'post_author' => get_current_user_id(),
+					    'post_content' => '',
+					    'post_status' => "publish",
+					    'post_title' => $title,
+					    'post_parent' => '',
+					    'post_type' => "product",
+						);
+
+						//Create post
+						$newproduct_id = wp_insert_post( $post );
+
+						// Tipo de producto (SIMPLE)
+						wp_set_object_terms( $newproduct_id, 'simple', 'product_type');
+
+						// Terms
+						wp_set_object_terms( $newproduct_id, array( $cat_id, $subcat_id ), 'product_cat' );
+
+						// Meta
+						update_post_meta( $newproduct_id, '_visibility', 'visible' );
+						update_post_meta( $newproduct_id, '_stock_status', 'instock');
+						update_post_meta( $newproduct_id, 'total_sales', '0');
+						update_post_meta( $newproduct_id, '_downloadable', 'no');
+						update_post_meta( $newproduct_id, '_virtual', 'no');
+						update_post_meta($post_id, '_sku', $sku);
+
+						// Actualizar precio
+						// Aplica descuento?
+						if( $apply_discount ){
+							wcsvu_change_price_by_type( $newproduct_id, $precio_descuento ,'price' );
+							wcsvu_change_price_by_type( $newproduct_id, $precio ,'regular_price' );
+							wcsvu_change_price_by_type( $newproduct_id, $precio_descuento ,'sale_price' );
+						} else {
+							wcsvu_change_product_price( $newproduct_id, $precio );
+						}
+						// Actualizar stock
+						wc_update_product_stock( $newproduct_id, $stock );
+
+
+						// Log info
+						$_log .= "NUEVO -----------------------------------------------------------";
+						$_log .= "-----------------------------------------------------------------------------\n";
+						$_log .= "(".$sku.") :: " . $title . "\n";
+						$_log .= __('Price', 'woocommerce-csvupdate') . ": $" . $precio . " | ";
+						$_log .= __('Sale Price', 'woocommerce-csvupdate') . ": $" . $precio_descuento . " | ";
+						$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $stock . "\n";
+						$_log .= __('Category', 'woocommerce-csvupdate') . ": " . @$cat_obj->name . "\n";
+						$_log .= __('Sub-Category', 'woocommerce-csvupdate') . ": " . @$subcat_obj->name . "\n";
+						$_log .= "-----------------------------------------------------------";
+						$_log .= "-----------------------------------------------------------------------------\n";
+
+						// Incrementar contador
+						$productos_nuevos++;
+					} else {
+						// El producto nuevo no tiene stock
+						$productos_no_importados++;
+					}
+				}
 
 			} // if $sku
 
@@ -161,7 +271,7 @@ if( isset($_GET['do-it']) ){
 
 	<?php if( isset( $exito ) && $exito ): ?>
 		<div id="message" class="updated notice is-dismissible"><p>
-			<?php echo sprintf( __('<strong>%s</strong> products were updated. <strong>%s</strong> were ignored.', 'woocommerce-csvupdate' ), $importados, $no_importados ); ?></p></div>
+			<?php echo sprintf( __('<strong>%s</strong> products were updated. <strong>%s</strong> were inserted. <strong>%s</strong> were ignored.', 'woocommerce-csvupdate' ), $productos_actualizados, $productos_nuevos, $productos_no_importados ); ?></p></div>
 	<?php endif; ?>
 
 <h1><?php _e('CSV Update', 'woocommerce-csvupdate'); ?></h1>
@@ -184,9 +294,25 @@ if( isset($_GET['do-it']) ){
 		<input class="woocommerce-csvupdate-input" type="text" name="column-stock" id="column-stock" value="<?php echo get_option( 'woocommerce-csvupdate-column-stock', '11' ); ?>">
 	</p>
 	<p>
+		<label class="woocommerce-csvupdate-label" for="column-title"><?php _e('Title Column <br><small>Only used when inserting new products</small>', 'woocommerce-csvupdate'); ?></label>
+		<input class="woocommerce-csvupdate-input" type="text" name="column-title" id="column-title" value="<?php echo get_option( 'woocommerce-csvupdate-column-title', '3' ); ?>">
+	</p>
+	<p>
+		<label class="woocommerce-csvupdate-label" for="column-category"><?php _e('Category Column <br><small>Only used when inserting new products</small>', 'woocommerce-csvupdate'); ?></label>
+		<input class="woocommerce-csvupdate-input" type="text" name="column-category" id="column-category" value="<?php echo get_option( 'woocommerce-csvupdate-column-category', '6' ); ?>">
+	</p>
+	<p>
+		<label class="woocommerce-csvupdate-label" for="column-subcategory"><?php _e('Sub-category Column <br><small>Only used when inserting new products</small>', 'woocommerce-csvupdate'); ?></label>
+		<input class="woocommerce-csvupdate-input" type="text" name="column-subcategory" id="column-subcategory" value="<?php echo get_option( 'woocommerce-csvupdate-column-subcategory', '7' ); ?>">
+	</p>
+	<p>
 		<label class="woocommerce-csvupdate-label" for="apply-discount"><?php _e('Apply discount in % to all products?', 'woocommerce-csvupdate'); ?></label>
 		<input class="woocommerce-csvupdate-input" type="checkbox" name="apply-discount" id="apply-discount" value="1" <?php if( get_option( 'woocommerce-csvupdate-apply-discount', '0' ) == '1' ){ echo 'checked="checked"'; }; ?>>
 		<input class="woocommerce-csvupdate-input" type="number" name="discount" id="discount" value="<?php echo get_option( 'woocommerce-csvupdate-discount', '0' ); ?>"> %
+	</p>
+	<p>
+		<label class="woocommerce-csvupdate-label" for="insert-new"><?php _e('Add nonexistent products?', 'woocommerce-csvupdate'); ?></label>
+		<input class="woocommerce-csvupdate-input" type="checkbox" name="insert-new" id="insert-new" value="1" <?php if( get_option( 'woocommerce-csvupdate-insert-new', '0' ) == '1' ){ echo 'checked="checked"'; }; ?>>
 	</p>
 	<hr>
 	<p>
