@@ -167,21 +167,28 @@ if( isset($_GET['do-it']) ){
 							if( $category ){
 								// Crear categoria
 								$cat_obj = wp_insert_term( $category, 'product_cat' );
-								$cat_id = $cat_obj->term_id;
+								if( is_array($cat_obj) ){
+									$cat_id = $cat_obj['term_id'];
+								} else{
+									// Ocurrió un error. Tal vez ya existe?
+									// HACER ALGO
+								}
 							}
 						}
 						// Obtengo la SUB categoría
 						$subcat_id = false;
-						$subcat_obj = get_term_by('name', $subcategory, 'product_cat');
-						if( $subcat_obj ){
-							// La categoría ya existe
-							$subcat_id = $subcat_obj->term_id;
-						} else {
-							// La categoría no existe
-							if( $subcategory && $cat_id ){
-								// Crear sub-categoria sólo si la categoría existe
-								$subcat_obj = wp_insert_term( $subcategory, 'product_cat', array( 'parent' => $cat_id ) );
-								$subcat_id = $subcat_obj->term_id;
+						// $subcat_obj = get_term_by('name', $subcategory, 'product_cat');
+
+						if( $subcategory ){
+							// USO wp_insert_term para buscar. Si devuelve error: EXISTE; SI NO, LA CREA
+							$subcat_obj = wp_insert_term( $subcategory, 'product_cat', array( 'parent' => $cat_id ) );
+
+							if( is_wp_error($subcat_obj) ){
+								// Ya existía
+								$subcat_id = $subcat_obj->error_data['term_exists'];
+							} else {
+								// Es nueva
+								$subcat_id = $subcat_obj['term_id'];
 							}
 						}
 
@@ -202,7 +209,10 @@ if( isset($_GET['do-it']) ){
 						wp_set_object_terms( $newproduct_id, 'simple', 'product_type');
 
 						// Terms
-						wp_set_object_terms( $newproduct_id, array( $cat_id, $subcat_id ), 'product_cat' );
+						if( $cat_id )
+							wp_set_object_terms( $newproduct_id, intval($cat_id), 'product_cat' );
+						if( $subcat_id )
+							wp_set_object_terms( $newproduct_id, intval($subcat_id), 'product_cat', true );
 
 						// Meta
 						update_post_meta( $newproduct_id, '_visibility', 'visible' );
@@ -232,8 +242,8 @@ if( isset($_GET['do-it']) ){
 						$_log .= __('Price', 'woocommerce-csvupdate') . ": $" . $precio . " | ";
 						$_log .= __('Sale Price', 'woocommerce-csvupdate') . ": $" . $precio_descuento . " | ";
 						$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $stock . "\n";
-						$_log .= __('Category', 'woocommerce-csvupdate') . ": " . @$cat_obj->name . "\n";
-						$_log .= __('Sub-Category', 'woocommerce-csvupdate') . ": " . @$subcat_obj->name . "\n";
+						$_log .= __('Category', 'woocommerce-csvupdate') . ": " . $category . "\n";
+						$_log .= __('Sub-Category', 'woocommerce-csvupdate') . ": " . $subcategory . "\n";
 						$_log .= "-----------------------------------------------------------";
 						$_log .= "-----------------------------------------------------------------------------\n";
 
