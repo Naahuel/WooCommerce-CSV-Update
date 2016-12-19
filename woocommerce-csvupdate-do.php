@@ -27,6 +27,10 @@ if( isset($_GET['do-it']) ){
 		{ update_option( 'woocommerce-csvupdate-insert-new', intval($_POST['insert-new']) ); }
 	else
 		{ update_option( 'woocommerce-csvupdate-insert-new', 0 ); }
+	if( isset( $_POST['csv-delimiter-tab'] ) )
+		{ update_option( 'woocommerce-csvupdate-csv-delimiter-tab', intval($_POST['csv-delimiter-tab']) ); }
+	else
+		{ update_option( 'woocommerce-csvupdate-csv-delimiter-tab', 0 ); }
 	if( isset( $_POST['discount'] ) )
 		{ update_option( 'woocommerce-csvupdate-discount', intval($_POST['discount']) ); }
 
@@ -42,6 +46,7 @@ if( isset($_GET['do-it']) ){
 	$column_subcategory	= intval( get_option( 'woocommerce-csvupdate-column-subcategory',  intval($_POST['column-stock']) ) ) - 1;
 	$apply_discount   = intval( get_option( 'woocommerce-csvupdate-apply-discount',  intval($_POST['apply-discount']) ) );
 	$insert_new		 		= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval($_POST['insert-new']) ) );
+	$csv_delimiter_tab	= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval($_POST['csv-delimiter-tab']) ) );
 	$discount  		 		= floatval( get_option( 'woocommerce-csvupdate-discount',  floatval($_POST['discount']) ) );
 
 	//--------------------------------------------------------------
@@ -89,7 +94,8 @@ if( isset($_GET['do-it']) ){
 		foreach ($hw_file as $linea) {
 
 			// Obtengo la línea del csv reemplazando comas por puntos en números
-			$csv_linea = str_replace(',', '.', str_getcsv( $linea, $csv_delimiter ));
+			$csv_delimiter = $csv_delimiter_tab ? "\t" : $csv_delimiter;
+			$csv_linea = str_getcsv( $linea, $csv_delimiter );
 			$num_linea++;
 
 			if( $num_linea == 1 ){
@@ -101,7 +107,7 @@ if( isset($_GET['do-it']) ){
 			$sku 							= trim($csv_linea[ $column_sku ]);
 			$precio 					= str_replace(',','.',trim($csv_linea[ $column_price ]));
 			$precio_descuento = $precio;
-			$stock  					= trim($csv_linea[ $column_stock ]);
+			$stock  					= str_replace(',','.',trim($csv_linea[ $column_stock ]));
 			$title  					= trim($csv_linea[ $column_title ]);
 			$category 				= trim($csv_linea[ $column_category ]);
 			$subcategory			= trim($csv_linea[ $column_subcategory ]);
@@ -147,6 +153,14 @@ if( isset($_GET['do-it']) ){
 					}
 					// Actualizar stock
 					wc_update_product_stock( $product_id, $stock );
+					update_post_meta( $product_id, '_manage_stock', 'yes');
+
+					// Actualizar título
+					$product_new_title = array(
+				      'ID'           => $product_id,
+				      'post_title'   => $title,
+				  );
+				  wp_update_post( $product_new_title );
 
 				} else {
 					// El producto no existe
@@ -217,6 +231,7 @@ if( isset($_GET['do-it']) ){
 						// Meta
 						update_post_meta( $newproduct_id, '_visibility', 'visible' );
 						update_post_meta( $newproduct_id, '_stock_status', 'instock');
+						update_post_meta( $newproduct_id, '_manage_stock', 'yes');
 						update_post_meta( $newproduct_id, 'total_sales', '0');
 						update_post_meta( $newproduct_id, '_downloadable', 'no');
 						update_post_meta( $newproduct_id, '_virtual', 'no');
@@ -290,6 +305,7 @@ if( isset($_GET['do-it']) ){
 	<p>
 		<label class="woocommerce-csvupdate-label" for="csv-delimiter"><?php _e('CSV Delimiter', 'woocommerce-csvupdate'); ?></label>
 		<input class="woocommerce-csvupdate-input" type="text" name="csv-delimiter" id="csv-delimiter" value="<?php echo get_option( 'woocommerce-csvupdate-csv-delimiter', ';' ); ?>">
+		<label for="csv-delimiter-tab"><?php _e("TAB", "woocommerce-csvupdate"); ?> <input class="woocommerce-csvupdate-input" type="checkbox" name="csv-delimiter-tab" id="csv-delimiter-tab" value="1" <?php if( get_option( 'woocommerce-csvupdate-csv-delimiter-tab', '0' ) == '1' ){ echo 'checked="checked"'; }; ?>></label>
 	</p>
 	<p>
 		<label class="woocommerce-csvupdate-label" for="column-sku"><?php _e('SKU Column', 'woocommerce-csvupdate'); ?></label>
