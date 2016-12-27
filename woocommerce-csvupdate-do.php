@@ -217,53 +217,63 @@ if( isset($_GET['do-it']) ){
 						);
 
 						//Create post
-						$newproduct_id = wp_insert_post( $post );
+						$newproduct_id = wp_insert_post( $post, true );
 
-						// Tipo de producto (SIMPLE)
-						wp_set_object_terms( $newproduct_id, 'simple', 'product_type');
-
-						// Terms
-						if( $cat_id )
-							wp_set_object_terms( $newproduct_id, intval($cat_id), 'product_cat' );
-						if( $subcat_id )
-							wp_set_object_terms( $newproduct_id, intval($subcat_id), 'product_cat', true );
-
-						// Meta
-						update_post_meta( $newproduct_id, '_visibility', 'visible' );
-						update_post_meta( $newproduct_id, '_stock_status', 'instock');
-						update_post_meta( $newproduct_id, '_manage_stock', 'yes');
-						update_post_meta( $newproduct_id, 'total_sales', '0');
-						update_post_meta( $newproduct_id, '_downloadable', 'no');
-						update_post_meta( $newproduct_id, '_virtual', 'no');
-						update_post_meta( $newproduct_id, '_sku', $sku);
-
-						// Actualizar precio
-						// Aplica descuento?
-						if( $apply_discount ){
-							wcsvu_change_price_by_type( $newproduct_id, $precio_descuento ,'price' );
-							wcsvu_change_price_by_type( $newproduct_id, $precio ,'regular_price' );
-							wcsvu_change_price_by_type( $newproduct_id, $precio_descuento ,'sale_price' );
+						if( is_wp_error($newproduct_id) ){
+							$_log .= "ERROR!!!! -----------------------------------------------------------";
+							$_log .= "-----------------------------------------------------------------------------\n";
+							$_log .= "(".$sku.") :: NO SE PUDO GUARDAR EN LA BASE DE DATOS";
+							$_log .= "-----------------------------------------------------------";
+							$_log .= "-----------------------------------------------------------------------------\n";
+							// El producto nuevo no se pudo insertar
+							$productos_no_importados++;
 						} else {
-							wcsvu_change_product_price( $newproduct_id, $precio );
+							// Tipo de producto (SIMPLE)
+							wp_set_object_terms( $newproduct_id, 'simple', 'product_type');
+
+							// Terms
+							if( $cat_id )
+								wp_set_object_terms( $newproduct_id, intval($cat_id), 'product_cat' );
+							if( $subcat_id )
+								wp_set_object_terms( $newproduct_id, intval($subcat_id), 'product_cat', true );
+
+							// Meta
+							update_post_meta( $newproduct_id, '_visibility', 'visible' );
+							update_post_meta( $newproduct_id, '_stock_status', 'instock');
+							update_post_meta( $newproduct_id, '_manage_stock', 'yes');
+							update_post_meta( $newproduct_id, 'total_sales', '0');
+							update_post_meta( $newproduct_id, '_downloadable', 'no');
+							update_post_meta( $newproduct_id, '_virtual', 'no');
+							update_post_meta( $newproduct_id, '_sku', $sku);
+
+							// Actualizar precio
+							// Aplica descuento?
+							if( $apply_discount ){
+								wcsvu_change_price_by_type( $newproduct_id, $precio_descuento ,'price' );
+								wcsvu_change_price_by_type( $newproduct_id, $precio ,'regular_price' );
+								wcsvu_change_price_by_type( $newproduct_id, $precio_descuento ,'sale_price' );
+							} else {
+								wcsvu_change_product_price( $newproduct_id, $precio );
+							}
+							// Actualizar stock
+							wc_update_product_stock( $newproduct_id, $stock );
+
+
+							// Log info
+							$_log .= "NUEVO -----------------------------------------------------------";
+							$_log .= "-----------------------------------------------------------------------------\n";
+							$_log .= "(".$sku.") :: " . $title . "\n";
+							$_log .= __('Price', 'woocommerce-csvupdate') . ": $" . $precio . " | ";
+							$_log .= __('Sale Price', 'woocommerce-csvupdate') . ": $" . $precio_descuento . " | ";
+							$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $stock . "\n";
+							$_log .= __('Category', 'woocommerce-csvupdate') . ": " . $category . "\n";
+							$_log .= __('Sub-Category', 'woocommerce-csvupdate') . ": " . $subcategory . "\n";
+							$_log .= "-----------------------------------------------------------";
+							$_log .= "-----------------------------------------------------------------------------\n";
+
+							// Incrementar contador
+							$productos_nuevos++;
 						}
-						// Actualizar stock
-						wc_update_product_stock( $newproduct_id, $stock );
-
-
-						// Log info
-						$_log .= "NUEVO -----------------------------------------------------------";
-						$_log .= "-----------------------------------------------------------------------------\n";
-						$_log .= "(".$sku.") :: " . $title . "\n";
-						$_log .= __('Price', 'woocommerce-csvupdate') . ": $" . $precio . " | ";
-						$_log .= __('Sale Price', 'woocommerce-csvupdate') . ": $" . $precio_descuento . " | ";
-						$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $stock . "\n";
-						$_log .= __('Category', 'woocommerce-csvupdate') . ": " . $category . "\n";
-						$_log .= __('Sub-Category', 'woocommerce-csvupdate') . ": " . $subcategory . "\n";
-						$_log .= "-----------------------------------------------------------";
-						$_log .= "-----------------------------------------------------------------------------\n";
-
-						// Incrementar contador
-						$productos_nuevos++;
 					} else {
 						// El producto nuevo no tiene stock
 						$productos_no_importados++;
