@@ -95,7 +95,7 @@ if( isset($_GET['do-it']) ){
 
 			// Obtengo la línea del csv reemplazando comas por puntos en números
 			$csv_delimiter = $csv_delimiter_tab ? "\t" : $csv_delimiter;
-			$csv_linea = str_getcsv( $linea, $csv_delimiter );
+			$csv_linea = str_getcsv( utf8_encode($linea), $csv_delimiter );
 			$num_linea++;
 
 			if( $num_linea == 1 ){
@@ -104,13 +104,13 @@ if( isset($_GET['do-it']) ){
 			}
 
 			// Nuevos valores para el productow
-			$sku 							= trim($csv_linea[ $column_sku ]);
-			$precio 					= str_replace(',','.',trim($csv_linea[ $column_price ]));
-			$precio_descuento = $precio;
-			$stock  					= str_replace(',','.',trim($csv_linea[ $column_stock ]));
-			$title  					= trim($csv_linea[ $column_title ]);
-			$category 				= trim($csv_linea[ $column_category ]);
-			$subcategory			= trim($csv_linea[ $column_subcategory ]);
+			$sku 							= @trim($csv_linea[ $column_sku ]);
+			$precio 					= @str_replace(',','.',trim($csv_linea[ $column_price ]));
+			$precio_descuento = @$precio;
+			$stock  					= @str_replace(',','.',trim($csv_linea[ $column_stock ]));
+			$title  					= @trim($csv_linea[ $column_title ]);
+			$category 				= @trim($csv_linea[ $column_category ]);
+			$subcategory			= @trim($csv_linea[ $column_subcategory ]);
 
 			// Aplica descuento?
 			if( $apply_discount ){
