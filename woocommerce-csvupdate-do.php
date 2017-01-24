@@ -95,7 +95,15 @@ if( isset($_GET['do-it']) ){
 
 			// Obtengo la línea del csv reemplazando comas por puntos en números
 			$csv_delimiter = $csv_delimiter_tab ? "\t" : $csv_delimiter;
-			$csv_linea = str_getcsv( utf8_encode($linea), $csv_delimiter );
+			$__detect_encod = mb_detect_encoding($linea, mb_detect_order(), true);
+			if( $__detect_encod ){
+				// Se detectó algún encoding. No importa cual, convertir a UTF-8
+				$linea = iconv($__detect_encod, "UTF-8", $linea);
+			} else {
+				// NO se pudo detectar un encoding. Intentar convertir de todas formas
+				$linea = utf8_encode( $linea );
+			}
+			$csv_linea = str_getcsv( $linea, $csv_delimiter );
 			$num_linea++;
 
 			if( $num_linea == 1 ){
@@ -307,6 +315,9 @@ if( isset($_GET['do-it']) ){
 	<?php if( isset( $exito ) && $exito ): ?>
 		<div id="message" class="updated notice is-dismissible"><p>
 			<?php echo sprintf( __('<strong>%s</strong> products were updated. <strong>%s</strong> were inserted. <strong>%s</strong> were ignored.', 'woocommerce-csvupdate' ), $productos_actualizados, $productos_nuevos, $productos_no_importados ); ?></p></div>
+	<?php else: ?>
+		<div id="message" class="error notice is-dismissible"><p><?php _e('<strong>CUIDADO</strong> - Realice <em>siempre</em> un backup de la base de datos antes de importar un archivo!', 'woocommerce-csvupdate'); ?></p></div>
+		<div id="message" class="error notice is-dismissible"><p><?php _e('<strong>CUIDADO</strong> - Verifique que las columnas sean correctas antes de importar un archivo nuevo!', 'woocommerce-csvupdate'); ?></p></div>
 	<?php endif; ?>
 
 <h1><?php _e('CSV Update', 'woocommerce-csvupdate'); ?></h1>
