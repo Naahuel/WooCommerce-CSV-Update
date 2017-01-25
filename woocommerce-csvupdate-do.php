@@ -116,7 +116,7 @@ if( isset($_GET['do-it']) ){
 			$precio 					= @floatval(str_replace(',','',trim($csv_linea[ $column_price ])));
 			// $precio 					= str_replace( '.', ',', $precio );
 			$precio_descuento = @$precio;
-			$stock  					= @floatval(str_replace(',','',trim($csv_linea[ $column_stock ])));
+			$stock  					= @intval(str_replace(',','',trim($csv_linea[ $column_stock ])));
 			// $stock	 					= str_replace( '.', ',', $stock );
 			$title  					= @trim($csv_linea[ $column_title ]);
 			$category 				= @trim($csv_linea[ $column_category ]);
@@ -160,8 +160,8 @@ if( isset($_GET['do-it']) ){
 						wcsvu_change_product_price( $product_id, $precio );
 					}
 					// Actualizar stock
-					wc_update_product_stock( $product_id, $stock );
 					update_post_meta( $product_id, '_manage_stock', 'yes');
+					wc_update_product_stock( $product_id, $stock );
 
 					// Actualizar título
 					$product_new_title = array(
@@ -169,6 +169,7 @@ if( isset($_GET['do-it']) ){
 				      'post_title'   => $title,
 				  );
 				  wp_update_post( $product_new_title );
+					wc_delete_product_transients( $product_id );
 
 				} else {
 					// El producto no existe
