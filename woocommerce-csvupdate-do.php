@@ -44,10 +44,10 @@ if( isset($_GET['do-it']) ){
 	$column_title  			= intval( get_option( 'woocommerce-csvupdate-column-title',  intval($_POST['column-stock']) ) ) - 1;
 	$column_category  	= intval( get_option( 'woocommerce-csvupdate-column-category',  intval($_POST['column-stock']) ) ) - 1;
 	$column_subcategory	= intval( get_option( 'woocommerce-csvupdate-column-subcategory',  intval($_POST['column-stock']) ) ) - 1;
-	$apply_discount   = intval( get_option( 'woocommerce-csvupdate-apply-discount',  intval($_POST['apply-discount']) ) );
-	$insert_new		 		= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval($_POST['insert-new']) ) );
+	$apply_discount   	= intval( get_option( 'woocommerce-csvupdate-apply-discount',  intval($_POST['apply-discount']) ) );
+	$insert_new		 			= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval($_POST['insert-new']) ) );
 	$csv_delimiter_tab	= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval($_POST['csv-delimiter-tab']) ) );
-	$discount  		 		= floatval( get_option( 'woocommerce-csvupdate-discount',  floatval($_POST['discount']) ) );
+	$discount  		 			= floatval( get_option( 'woocommerce-csvupdate-discount',  floatval($_POST['discount']) ) );
 
 	//--------------------------------------------------------------
 	// :: Subir archivo
@@ -113,18 +113,18 @@ if( isset($_GET['do-it']) ){
 
 			// Nuevos valores para el productow
 			$sku 							= @trim($csv_linea[ $column_sku ]);
-			$precio 					= @str_replace(',','.',trim($csv_linea[ $column_price ]));
+			$precio 					= @floatval(str_replace(',','',trim($csv_linea[ $column_price ])));
+			// $precio 					= str_replace( '.', ',', $precio );
 			$precio_descuento = @$precio;
-			$stock  					= @str_replace(',','.',trim($csv_linea[ $column_stock ]));
+			$stock  					= @floatval(str_replace(',','',trim($csv_linea[ $column_stock ])));
+			// $stock	 					= str_replace( '.', ',', $stock );
 			$title  					= @trim($csv_linea[ $column_title ]);
 			$category 				= @trim($csv_linea[ $column_category ]);
 			$subcategory			= @trim($csv_linea[ $column_subcategory ]);
 
 			// Aplica descuento?
 			if( $apply_discount ){
-				$__precio = floatval( trim($csv_linea[ $column_price ]) );
-				$precio_descuento = ( (100-$discount)/100 )*$__precio;
-				$precio_descuento = str_replace(',','.', $precio_descuento);
+				$precio_descuento = ( (100-$discount)/100 )*$precio;
 			}
 
 			// Busco el producto por SKU
@@ -172,7 +172,7 @@ if( isset($_GET['do-it']) ){
 
 				} else {
 					// El producto no existe
-					if( $stock && $insert_new ){
+					if( ($stock > 0) && $precio && $insert_new ){
 						// El producto nuevo tiene stock y se pidió agregar nuevos
 						//-------------------------------------------------
 						// INSERTAR
@@ -322,7 +322,7 @@ if( isset($_GET['do-it']) ){
 
 <h1><?php _e('CSV Update', 'woocommerce-csvupdate'); ?></h1>
 
-<form action="<?php menu_page_url('woocommerce-csvupdate/woocommerce-csvupdate-do.php'); ?>&amp;do-it=go" method="post" enctype="multipart/form-data">
+<form id="form-csv-update" action="<?php menu_page_url('woocommerce-csvupdate/woocommerce-csvupdate-do.php'); ?>&amp;do-it=go" method="post" enctype="multipart/form-data">
 	<p>
 		<label class="woocommerce-csvupdate-label" for="csv-delimiter"><?php _e('CSV Delimiter', 'woocommerce-csvupdate'); ?></label>
 		<input class="woocommerce-csvupdate-input" type="text" name="csv-delimiter" id="csv-delimiter" value="<?php echo get_option( 'woocommerce-csvupdate-csv-delimiter', ';' ); ?>">
@@ -368,7 +368,7 @@ if( isset($_GET['do-it']) ){
 	</p>
 	<hr>
 	<p>
-		<button class="button button button-primary">
+		<button id="button-go" class="button button button-primary">
 			<?php _e('Run', 'woocommerce-csvupdate'); ?>
 		</button>
 	</p>
@@ -378,5 +378,13 @@ if( isset($_GET['do-it']) ){
 	<h2><?php _e('Log', 'woocommerce-csvupdate'); ?>:</h2>
 <textarea rows="8" cols="40" class="widefat" style="height:500px"><?php echo $_log; ?></textarea>
 <?php endif; ?>
+
+<script type="text/javascript">
+	(function($){
+		$('#form-csv-update').on('submit', function(){
+			$('#button-go').attr('disabled', true);
+		})
+	})(jQuery);
+</script>
 
 </div> <!--.wrap-->
