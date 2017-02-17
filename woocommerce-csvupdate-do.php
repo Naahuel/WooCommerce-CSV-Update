@@ -144,24 +144,34 @@ if( isset($_GET['do-it']) ){
 					$hice_cambios_en_este_producto = array();
 
 					// Actualizar precio ?
-					if( floatval($_product->get_price()) != floatval($precio) ){
+					if( intval($_product->get_regular_price()) != intval($precio) ){
 						$productos_actualizados_precio++;
-						wcsvu_change_price_by_type( $product_id, $precio_descuento ,'price' );
-						wcsvu_change_price_by_type( $product_id, $precio ,'regular_price' );
-						wcsvu_change_price_by_type( $product_id, $precio_descuento ,'sale_price' );
 						$hice_cambios_en_este_producto[] = 'precio';
+						$hice_cambios_en_este_producto['precio_viejo'] = $_product->get_price();
+						if( $apply_discount ){
+							wcsvu_change_price_by_type( $product_id, $precio_descuento ,'price' );
+							wcsvu_change_price_by_type( $product_id, $precio ,'regular_price' );
+							wcsvu_change_price_by_type( $product_id, $precio_descuento ,'sale_price' );
+						} else {
+							wcsvu_change_price_by_type( $product_id, $precio ,'price' );
+							wcsvu_change_price_by_type( $product_id, $precio ,'regular_price' );
+							wcsvu_change_price_by_type( $product_id, $precio ,'sale_price' );
+						}
 					}
 					// Actualizar stock ?
 					if( floatval($_product->get_stock_quantity()) != floatval($stock) ){
 						$productos_actualizados_stock++;
+						$hice_cambios_en_este_producto[] = 'stock';
+						$hice_cambios_en_este_producto['stock_viejo'] = $_product->get_stock_quantity();
 						update_post_meta( $product_id, '_manage_stock', 'yes');
 						wc_update_product_stock( $product_id, $stock );
-						$hice_cambios_en_este_producto[] = 'stock';
 					}
 
 					// Actualizar título ?
-					if( floatval( trim($_product->get_title()) != trim($title) ) ){
+					if( trim($title) && ( floatval( trim($_product->get_title()) != trim($title) ) ) ){
 						$productos_actualizados_titulo++;
+						$hice_cambios_en_este_producto[] = 'titulo';
+						$hice_cambios_en_este_producto['titulo_viejo'] = $_product->get_title();
 						$product_new_title = array(
 					      'ID'           => $product_id,
 					      'post_title'   => $title,
@@ -177,12 +187,15 @@ if( isset($_GET['do-it']) ){
 					if( !empty( $hice_cambios_en_este_producto ) ){
 						$_log .= "ACTUALIZADO -----------------------------------------------------------";
 						$_log .= "-----------------------------------------------------------------------------\n";
-						$_log .= "(".$sku.") :: " . $_product->post->post_title . "\n";
+						$_log .= "(".$sku.")" . "\n";
+						if( in_array('titulo', $hice_cambios_en_este_producto) ){
+							$_log .= __('Title', 'woocommerce-csvupdate') . ": " . $hice_cambios_en_este_producto['titulo_viejo'] . " ---> " . $title . "\n";
+						}
 						if( in_array('precio', $hice_cambios_en_este_producto) ){
-							$_log .= __('Price', 'woocommerce-csvupdate') . ": $" . $_product->get_price() . " ---> $" . $precio . "\n";
+							$_log .= __('Price', 'woocommerce-csvupdate') . ": $" . $hice_cambios_en_este_producto['precio_viejo'] . " ---> $" . $precio . "\n";
 						}
 						if( in_array('stock', $hice_cambios_en_este_producto) ){
-							$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $_product->get_stock_quantity() . " ---> " . $stock . "\n";
+							$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $hice_cambios_en_este_producto['stock_viejo'] . " ---> " . $stock . "\n";
 						}
 						$_log .= "-----------------------------------------------------------";
 						$_log .= "-----------------------------------------------------------------------------\n";
