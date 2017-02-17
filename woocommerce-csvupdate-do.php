@@ -168,16 +168,16 @@ if( isset($_GET['do-it']) ){
 					}
 
 					// Actualizar título ?
-					if( trim($title) && ( floatval( trim($_product->get_title()) != trim($title) ) ) ){
-						$productos_actualizados_titulo++;
-						$hice_cambios_en_este_producto[] = 'titulo';
-						$hice_cambios_en_este_producto['titulo_viejo'] = $_product->get_title();
-						$product_new_title = array(
-					      'ID'           => $product_id,
-					      'post_title'   => $title,
-					  );
-					  wp_update_post( $product_new_title );
-					}
+					// if( trim($title) && ( floatval( trim($_product->get_title()) != trim($title) ) ) ){
+					// 	$productos_actualizados_titulo++;
+					// 	$hice_cambios_en_este_producto[] = 'titulo';
+					// 	$hice_cambios_en_este_producto['titulo_viejo'] = $_product->get_title();
+					// 	$product_new_title = array(
+					//       'ID'           => $product_id,
+					//       'post_title'   => $title,
+					//   );
+					//   wp_update_post( $product_new_title );
+					// }
 
 					// Limpiar transitiens
 					wc_delete_product_transients( $product_id );
@@ -353,9 +353,9 @@ if( isset($_GET['do-it']) ){
 		<div class="updated notice is-dismissible"><p>
 			<?php echo sprintf( __('<strong>%s</strong> products with new stock.', 'woocommerce-csvupdate' ), $productos_actualizados_stock); ?>
 		</p></div>
-		<div class="updated notice is-dismissible"><p>
+		<!-- <div class="updated notice is-dismissible"><p>
 			<?php echo sprintf( __('<strong>%s</strong> products with new title.', 'woocommerce-csvupdate' ), $productos_actualizados_titulo); ?>
-		</p></div>
+		</p></div> -->
 	<?php else: ?>
 		<div class="error notice is-dismissible"><p><?php _e('<strong>WARNING</strong> - <em>Always</em> backup your database before uploading a file!', 'woocommerce-csvupdate'); ?></p></div>
 		<div class="error notice is-dismissible"><p><?php _e('<strong>WARNING</strong> - Check that the column numbers correspond with the ones in the CSV file!', 'woocommerce-csvupdate'); ?></p></div>
