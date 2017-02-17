@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Woocommerce CSV Import\n"
-"POT-Creation-Date: 2016-11-08 16:30-0300\n"
-"PO-Revision-Date: 2016-11-08 16:31-0300\n"
+"POT-Creation-Date: 2017-02-17 10:34-0300\n"
+"PO-Revision-Date: 2017-02-17 10:35-0300\n"
 "Last-Translator: Allaerd Mensonides <info@allaerd.org>\n"
 "Language-Team: Nahuel José <nahuel@nahueljose.com.ar>\n"
 "Language: es\n"
@@ -13,91 +13,140 @@ msgstr ""
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
-"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;"
-"_n_noop:1,2;_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: admin/admin.php:7 admin/admin.php:8 woocommerce-csvupdate-do.php:191
+#: admin/admin.php:7 admin/admin.php:8 woocommerce-csvupdate-do.php:351
 msgid "CSV Update"
 msgstr "Actualizar de CSV"
 
-#: woocommerce-csvupdate-do.php:128
+#: woocommerce-csvupdate-do.php:182 woocommerce-csvupdate-do.php:293
 msgid "Price"
 msgstr "Precio"
 
-#: woocommerce-csvupdate-do.php:129
-msgid "Sale Price"
-msgstr "Precio rebajado"
-
-#: woocommerce-csvupdate-do.php:130
+#: woocommerce-csvupdate-do.php:185 woocommerce-csvupdate-do.php:294
 msgid "Stock"
 msgstr "Existencias"
 
-#: woocommerce-csvupdate-do.php:183
+#: woocommerce-csvupdate-do.php:295
+msgid "Category"
+msgstr "Categoría"
+
+#: woocommerce-csvupdate-do.php:296
+msgid "Sub-Category"
+msgstr "Sub-categoría"
+
+#: woocommerce-csvupdate-do.php:330
 msgid "There was an error uploading the file."
 msgstr "Ocurrió un error subiendo el archivo."
 
-#: woocommerce-csvupdate-do.php:188
+#: woocommerce-csvupdate-do.php:335
 #, php-format
 msgid ""
-"<strong>%s</strong> products were updated. <strong>%s</strong> were "
-"inserted. <strong>%s</strong> were ignored."
+"<strong>%s</strong> products were found. <strong>%s</strong> were inserted. "
+"<strong>%s</strong> were ignored."
 msgstr ""
-"<strong>%s</strong> productos actualizados. <strong>%s</strong> productos "
-"nuevos. <strong>%s</strong> productos ignorados."
+"<strong>%s</strong> productos encontrados. <strong>%s</strong> nuevos. "
+"<strong>%s</strong> ignorados."
 
-#: woocommerce-csvupdate-do.php:195
+#: woocommerce-csvupdate-do.php:338
+#, php-format
+msgid "<strong>%s</strong> products with new price."
+msgstr "<strong>%s</strong> productos con nuevo precio"
+
+#: woocommerce-csvupdate-do.php:341
+#, php-format
+msgid "<strong>%s</strong> products with new stock."
+msgstr "<strong>%s</strong> productos con nuevo stock"
+
+#: woocommerce-csvupdate-do.php:344
+#, php-format
+msgid "<strong>%s</strong> products with new title."
+msgstr "<strong>%s</strong> productos con nuevo título"
+
+#: woocommerce-csvupdate-do.php:347
+msgid ""
+"<strong>WARNING</strong> - <em>Always</em> backup your database before "
+"uploading a file!"
+msgstr ""
+"<strong>CUIDADO</strong> - Realice <em>siempre</em> un backup de la base de "
+"datos antes de importar un archivo!"
+
+#: woocommerce-csvupdate-do.php:348
+msgid ""
+"<strong>WARNING</strong> - Check that the column numbers correspond with the "
+"ones in the CSV file!"
+msgstr ""
+"<strong>CUIDADO</strong> - Verifique que las columnas sean correctas antes "
+"de importar un archivo nuevo!"
+
+#: woocommerce-csvupdate-do.php:355
 msgid "CSV Delimiter"
 msgstr "Delimitador CSV"
 
-#: woocommerce-csvupdate-do.php:199
+#: woocommerce-csvupdate-do.php:357
+msgid "TAB"
+msgstr "TAB"
+
+#: woocommerce-csvupdate-do.php:360
 msgid "SKU Column"
 msgstr "Columna Cod. de Artículo"
 
-#: woocommerce-csvupdate-do.php:203
+#: woocommerce-csvupdate-do.php:364
 msgid "Price Column"
 msgstr "Columna de Precio"
 
-#: woocommerce-csvupdate-do.php:207
+#: woocommerce-csvupdate-do.php:368
 msgid "Stock Column"
 msgstr "Columna de Stock"
 
-#: woocommerce-csvupdate-do.php:211
+#: woocommerce-csvupdate-do.php:372
 msgid "Title Column <br><small>Only used when inserting new products</small>"
 msgstr "Columa de Título <br><small>Usada sólo para productos nuevos</small>"
 
-#: woocommerce-csvupdate-do.php:215
+#: woocommerce-csvupdate-do.php:376
 msgid ""
 "Category Column <br><small>Only used when inserting new products</small>"
 msgstr ""
 "Columna de Categoría <br><small>Usada sólo para productos nuevos</small>"
 
-#: woocommerce-csvupdate-do.php:219
+#: woocommerce-csvupdate-do.php:380
 msgid ""
 "Sub-category Column <br><small>Only used when inserting new products</small>"
 msgstr ""
 "Columna de Sub-categoría <br><small>Usada sólo para productos nuevos</small>"
 
-#: woocommerce-csvupdate-do.php:223
+#: woocommerce-csvupdate-do.php:384
 msgid "Apply discount in % to all products?"
 msgstr "¿Rebajar precio por X%?"
 
-#: woocommerce-csvupdate-do.php:228
+#: woocommerce-csvupdate-do.php:389
 msgid "Add nonexistent products?"
 msgstr "¿Agregar productos no existentes?"
 
-#: woocommerce-csvupdate-do.php:233
+#: woocommerce-csvupdate-do.php:394
 msgid "CSV File"
 msgstr "Archivo CSV"
 
-#: woocommerce-csvupdate-do.php:239
+#: woocommerce-csvupdate-do.php:400
 msgid "Run"
 msgstr "Ejecutar"
 
-#: woocommerce-csvupdate-do.php:245
+#: woocommerce-csvupdate-do.php:406
 msgid "Log"
 msgstr "Registro"
+
+#~ msgid "Sale Price"
+#~ msgstr "Precio rebajado"
+
+#~ msgid ""
+#~ "<strong>%s</strong> products were updated. <strong>%s</strong> were "
+#~ "inserted. <strong>%s</strong> were ignored."
+#~ msgstr ""
+#~ "<strong>%s</strong> productos actualizados. <strong>%s</strong> productos "
+#~ "nuevos. <strong>%s</strong> productos ignorados."
 
 #~ msgid "Title Column"
 #~ msgstr "Columna de Título"
