@@ -417,6 +417,7 @@ if( isset($_GET['do-it']) ){
 		<input type="file" name="csv-file" id="csv-file" value="">
 	</p>
 	<hr>
+	<p><?php _e('<strong>WARNING</strong> - This might take a long time!', 'woocommerce-csvupdate'); ?></p>
 	<p>
 		<button id="button-go" class="button button button-primary">
 			<?php _e('Run', 'woocommerce-csvupdate'); ?>

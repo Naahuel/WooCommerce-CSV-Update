@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Woocommerce CSV Import\n"
-"POT-Creation-Date: 2017-03-09 13:51-0300\n"
-"PO-Revision-Date: 2017-03-09 13:51-0300\n"
+"POT-Creation-Date: 2017-03-09 16:05-0300\n"
+"PO-Revision-Date: 2017-03-09 16:05-0300\n"
 "Last-Translator: Allaerd Mensonides <info@allaerd.org>\n"
 "Language-Team: Nahuel José <nahuel@nahueljose.com.ar>\n"
 "Language: es\n"
@@ -138,11 +138,15 @@ msgstr "¿Ignorar primera fila?"
 msgid "CSV File"
 msgstr "Archivo CSV"
 
-#: woocommerce-csvupdate-do.php:422
+#: woocommerce-csvupdate-do.php:420
+msgid "<strong>WARNING</strong> - This might take a long time!"
+msgstr "<strong>CUIDADO</strong> - ¡Esto puede demorar mucho!"
+
+#: woocommerce-csvupdate-do.php:423
 msgid "Run"
 msgstr "Ejecutar"
 
-#: woocommerce-csvupdate-do.php:428
+#: woocommerce-csvupdate-do.php:429
 msgid "Log"
 msgstr "Registro"
 
