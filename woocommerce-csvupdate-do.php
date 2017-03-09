@@ -33,6 +33,10 @@ if( isset($_GET['do-it']) ){
 		{ update_option( 'woocommerce-csvupdate-csv-delimiter-tab', 0 ); }
 	if( isset( $_POST['discount'] ) )
 		{ update_option( 'woocommerce-csvupdate-discount', intval($_POST['discount']) ); }
+	if( isset( $_POST['ignore-first-row'] ) )
+		{ update_option( 'woocommerce-csvupdate-ignore-first-row', intval($_POST['ignore-first-row']) ); }
+	else
+		{ update_option( 'woocommerce-csvupdate-ignore-first-row', 0 ); }
 
 	//--------------------------------------------------------------
 	// :: Obtener options
@@ -46,6 +50,7 @@ if( isset($_GET['do-it']) ){
 	$column_subcategory	= intval( get_option( 'woocommerce-csvupdate-column-subcategory',  intval($_POST['column-stock']) ) ) - 1;
 	$apply_discount   	= intval( get_option( 'woocommerce-csvupdate-apply-discount',  intval($_POST['apply-discount']) ) );
 	$insert_new		 			= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval($_POST['insert-new']) ) );
+	$ignore_first_row	  = intval( get_option( 'woocommerce-csvupdate-ignore-first-row',  intval($_POST['ignore-first-row']) ) );
 	$csv_delimiter_tab	= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval($_POST['csv-delimiter-tab']) ) );
 	$discount  		 			= floatval( get_option( 'woocommerce-csvupdate-discount',  floatval($_POST['discount']) ) );
 
@@ -109,7 +114,7 @@ if( isset($_GET['do-it']) ){
 			$csv_linea = str_getcsv( $linea, $csv_delimiter );
 			$num_linea++;
 
-			if( $num_linea == 1 ){
+			if( $ignore_first_row && $num_linea == 1 ){
 				// Ignorar primera línea
 				continue;
 			}
@@ -401,6 +406,10 @@ if( isset($_GET['do-it']) ){
 	<p>
 		<label class="woocommerce-csvupdate-label" for="insert-new"><?php _e('Add nonexistent products?', 'woocommerce-csvupdate'); ?></label>
 		<input class="woocommerce-csvupdate-input" type="checkbox" name="insert-new" id="insert-new" value="1" <?php if( get_option( 'woocommerce-csvupdate-insert-new', '0' ) == '1' ){ echo 'checked="checked"'; }; ?>>
+	</p>
+	<p>
+		<label class="woocommerce-csvupdate-label" for="insert-new"><?php _e('Ignore first row?', 'woocommerce-csvupdate'); ?></label>
+		<input class="woocommerce-csvupdate-input" type="checkbox" name="ignore-first-row" id="ignore-first-row" value="1" <?php if( get_option( 'woocommerce-csvupdate-ignore-first-row', '1' ) == '1' ){ echo 'checked="checked"'; }; ?>>
 	</p>
 	<hr>
 	<p>
