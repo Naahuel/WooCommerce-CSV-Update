@@ -130,14 +130,6 @@ if( isset($_GET['do-it']) ){
 			$category 				= @trim($csv_linea[ $column_category ]);
 			$subcategory			= @trim($csv_linea[ $column_subcategory ]);
 
-			var_dump($csv_linea);
-			var_dump($sku);
-			var_dump($csv_delimiter_tab);
-			var_dump($precio);
-			var_dump($stock);
-			var_dump($title);
-			die;
-
 			// Aplica descuento?
 			if( $apply_discount ){
 				$precio_descuento = ( (100-$discount)/100 )*$precio;
