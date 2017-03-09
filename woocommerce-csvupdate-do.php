@@ -148,8 +148,6 @@ if( isset($_GET['do-it']) ){
 
 			}
 
-			die;
-
 			// Busco el producto por SKU
 			if ($sku) {
 				// Obtengo el ID del producto
