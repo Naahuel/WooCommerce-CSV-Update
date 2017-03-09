@@ -42,17 +42,17 @@ if( isset($_GET['do-it']) ){
 	// :: Obtener options
 	//--------------------------------------------------------------
 	$csv_delimiter = get_option( 'woocommerce-csvupdate-csv-delimiter', trim($_POST['csv-delimiter']) );
-	$column_sku   			= intval( get_option( 'woocommerce-csvupdate-column-sku',    intval($_POST['column-sku']) ) ) - 1;
-	$column_price 			= intval( get_option( 'woocommerce-csvupdate-column-price',  intval($_POST['column-price']) ) ) - 1;
-	$column_stock  			= intval( get_option( 'woocommerce-csvupdate-column-stock',  intval($_POST['column-stock']) ) ) - 1;
-	$column_title  			= intval( get_option( 'woocommerce-csvupdate-column-title',  intval($_POST['column-stock']) ) ) - 1;
-	$column_category  	= intval( get_option( 'woocommerce-csvupdate-column-category',  intval($_POST['column-stock']) ) ) - 1;
-	$column_subcategory	= intval( get_option( 'woocommerce-csvupdate-column-subcategory',  intval($_POST['column-stock']) ) ) - 1;
-	$apply_discount   	= intval( get_option( 'woocommerce-csvupdate-apply-discount',  intval($_POST['apply-discount']) ) );
-	$insert_new		 			= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval($_POST['insert-new']) ) );
-	$ignore_first_row	  = intval( get_option( 'woocommerce-csvupdate-ignore-first-row',  intval($_POST['ignore-first-row']) ) );
-	$csv_delimiter_tab	= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval($_POST['csv-delimiter-tab']) ) );
-	$discount  		 			= floatval( get_option( 'woocommerce-csvupdate-discount',  floatval($_POST['discount']) ) );
+	$column_sku   			= intval( get_option( 'woocommerce-csvupdate-column-sku',    intval(@$_POST['column-sku']) ) ) - 1;
+	$column_price 			= intval( get_option( 'woocommerce-csvupdate-column-price',  intval(@$_POST['column-price']) ) ) - 1;
+	$column_stock  			= intval( get_option( 'woocommerce-csvupdate-column-stock',  intval(@$_POST['column-stock']) ) ) - 1;
+	$column_title  			= intval( get_option( 'woocommerce-csvupdate-column-title',  intval(@$_POST['column-stock']) ) ) - 1;
+	$column_category  	= intval( get_option( 'woocommerce-csvupdate-column-category',  intval(@$_POST['column-stock']) ) ) - 1;
+	$column_subcategory	= intval( get_option( 'woocommerce-csvupdate-column-subcategory',  intval(@$_POST['column-stock']) ) ) - 1;
+	$apply_discount   	= intval( get_option( 'woocommerce-csvupdate-apply-discount',  intval(@$_POST['apply-discount']) ) );
+	$insert_new		 			= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval(@$_POST['insert-new']) ) );
+	$ignore_first_row	  = intval( get_option( 'woocommerce-csvupdate-ignore-first-row',  intval(@$_POST['ignore-first-row']) ) );
+	$csv_delimiter_tab	= intval( get_option( 'woocommerce-csvupdate-csv-delimiter-tab',  intval(@$_POST['csv-delimiter-tab']) ) );
+	$discount  		 			= floatval( get_option( 'woocommerce-csvupdate-discount',  floatval(@$_POST['discount']) ) );
 
 	//--------------------------------------------------------------
 	// :: Subir archivo
@@ -129,6 +129,14 @@ if( isset($_GET['do-it']) ){
 			$title  					= @trim($csv_linea[ $column_title ]);
 			$category 				= @trim($csv_linea[ $column_category ]);
 			$subcategory			= @trim($csv_linea[ $column_subcategory ]);
+
+			var_dump($csv_linea);
+			var_dump($sku);
+			var_dump($csv_delimiter_tab);
+			var_dump($precio);
+			var_dump($stock);
+			var_dump($title);
+			die;
 
 			// Aplica descuento?
 			if( $apply_discount ){
