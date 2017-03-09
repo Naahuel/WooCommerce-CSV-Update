@@ -19,6 +19,10 @@ if( isset($_GET['do-it']) ){
 		{ update_option( 'woocommerce-csvupdate-column-category', intval($_POST['column-category']) ); }
 	if( isset( $_POST['column-subcategory'] ) )
 		{ update_option( 'woocommerce-csvupdate-column-subcategory', intval($_POST['column-subcategory']) ); }
+	if( isset( $_POST['sku-mask'] ) )
+		{ update_option( 'woocommerce-csvupdate-sku-mask', $_POST['sku-mask'] ); }
+	if( isset( $_POST['sku-mask-replace'] ) )
+		{ update_option( 'woocommerce-csvupdate-sku-mask-replace', $_POST['sku-mask-replace'] ); }
 	if( isset( $_POST['apply-discount'] ) )
 		{ update_option( 'woocommerce-csvupdate-apply-discount', intval($_POST['apply-discount']) ); }
 	else
@@ -53,6 +57,8 @@ if( isset($_GET['do-it']) ){
 	$ignore_first_row	  = intval( get_option( 'woocommerce-csvupdate-ignore-first-row',  intval(@$_POST['ignore-first-row']) ) );
 	$csv_delimiter_tab	= intval( get_option( 'woocommerce-csvupdate-csv-delimiter-tab',  intval(@$_POST['csv-delimiter-tab']) ) );
 	$discount  		 			= floatval( get_option( 'woocommerce-csvupdate-discount',  floatval(@$_POST['discount']) ) );
+	$sku_mask  		 			= get_option( 'woocommerce-csvupdate-sku-mask',  @$_POST['sku-mask'] );
+	$sku_mask_replace		= get_option( 'woocommerce-csvupdate-sku-mask-replace',  @$_POST['sku-mask-replace'] );
 
 	//--------------------------------------------------------------
 	// :: Subir archivo
@@ -120,7 +126,7 @@ if( isset($_GET['do-it']) ){
 			}
 
 			// Nuevos valores para el productow
-			$sku 							= @trim($csv_linea[ $column_sku ]);
+			$sku 							= @$csv_linea[ $column_sku ];
 			$precio 					= @floatval(str_replace(',','',trim($csv_linea[ $column_price ])));
 			// $precio 					= str_replace( '.', ',', $precio );
 			$precio_descuento = @$precio;
@@ -134,6 +140,15 @@ if( isset($_GET['do-it']) ){
 			if( $apply_discount ){
 				$precio_descuento = ( (100-$discount)/100 )*$precio;
 			}
+
+			// Necesito aplicarle una máscara al SKU
+			if( $sku_mask ){
+				// Aplicar máscara al SKU
+				$sku = preg_replace( "/". $sku_mask ."/", $sku_mask_replace, $sku );
+
+			}
+
+			die;
 
 			// Busco el producto por SKU
 			if ($sku) {
@@ -342,6 +357,10 @@ if( isset($_GET['do-it']) ){
 		.woocommerce-csvupdate-input{
 			max-width: 50px;
 		}
+		.woocommerce-csvupdate-input-wide{
+			width: 200px;
+			max-width: none;
+		}
 	</style>
 
 	<?php if( isset( $upload_error ) && $upload_error ): ?>
@@ -415,6 +434,12 @@ if( isset($_GET['do-it']) ){
 	<p>
 		<label class="woocommerce-csvupdate-label" for="csv-file"><?php _e('CSV File', 'woocommerce-csvupdate'); ?></label>
 		<input type="file" name="csv-file" id="csv-file" value="">
+	</p>
+	<hr>
+	<p>
+		<label class="woocommerce-csvupdate-label" for="sku-mask"><?php _e('SKU Mask <br><small>RegExp for SKU code</small>', 'woocommerce-csvupdate'); ?></label>
+		<input class="woocommerce-csvupdate-input woocommerce-csvupdate-input-wide" placeholder="[Pattern]" type="text" name="sku-mask" id="sku-mask" value="<?php echo get_option( 'woocommerce-csvupdate-sku-mask', '' ); ?>">
+		<input class="woocommerce-csvupdate-input woocommerce-csvupdate-input-wide" placeholder="[Replace]" type="text" name="sku-mask-replace" id="sku-mask-replace" value="<?php echo get_option( 'woocommerce-csvupdate-sku-mask-replace', '' ); ?>">
 	</p>
 	<hr>
 	<p><?php _e('<strong>WARNING</strong> - This might take a long time!', 'woocommerce-csvupdate'); ?></p>
