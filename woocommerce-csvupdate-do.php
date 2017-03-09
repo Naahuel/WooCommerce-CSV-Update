@@ -156,13 +156,14 @@ if( isset($_GET['do-it']) ){
 				if( $product_id ){
 					// Obtener producto
 					$_product = wc_get_product( $product_id );
+
 					// El producto existe
 					$productos_encontrados++;
 
 					$hice_cambios_en_este_producto = array();
 
 					// Actualizar precio ?
-					if( intval($_product->get_regular_price()) != intval($precio) ){
+					if( floatval($_product->get_regular_price()) != floatval($precio) ){
 						$productos_actualizados_precio++;
 						$hice_cambios_en_este_producto[] = 'precio';
 						$hice_cambios_en_este_producto['precio_viejo'] = $_product->get_price();
@@ -177,7 +178,7 @@ if( isset($_GET['do-it']) ){
 						}
 					}
 					// Actualizar stock ?
-					if( floatval($_product->get_stock_quantity()) != floatval($stock) ){
+					if( intval($_product->get_stock_quantity()) != intval($stock) ){
 						$productos_actualizados_stock++;
 						$hice_cambios_en_este_producto[] = 'stock';
 						$hice_cambios_en_este_producto['stock_viejo'] = $_product->get_stock_quantity();
