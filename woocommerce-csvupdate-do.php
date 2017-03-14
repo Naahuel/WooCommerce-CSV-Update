@@ -43,24 +43,6 @@ if( isset($_GET['do-it']) ){
 		{ update_option( 'woocommerce-csvupdate-ignore-first-row', 0 ); }
 
 	//--------------------------------------------------------------
-	// :: Obtener options
-	//--------------------------------------------------------------
-	$csv_delimiter = get_option( 'woocommerce-csvupdate-csv-delimiter', trim($_POST['csv-delimiter']) );
-	$column_sku   			= intval( get_option( 'woocommerce-csvupdate-column-sku',    intval(@$_POST['column-sku']) ) ) - 1;
-	$column_price 			= intval( get_option( 'woocommerce-csvupdate-column-price',  intval(@$_POST['column-price']) ) ) - 1;
-	$column_stock  			= intval( get_option( 'woocommerce-csvupdate-column-stock',  intval(@$_POST['column-stock']) ) ) - 1;
-	$column_title  			= intval( get_option( 'woocommerce-csvupdate-column-title',  intval(@$_POST['column-stock']) ) ) - 1;
-	$column_category  	= intval( get_option( 'woocommerce-csvupdate-column-category',  intval(@$_POST['column-stock']) ) ) - 1;
-	$column_subcategory	= intval( get_option( 'woocommerce-csvupdate-column-subcategory',  intval(@$_POST['column-stock']) ) ) - 1;
-	$apply_discount   	= intval( get_option( 'woocommerce-csvupdate-apply-discount',  intval(@$_POST['apply-discount']) ) );
-	$insert_new		 			= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval(@$_POST['insert-new']) ) );
-	$ignore_first_row	  = intval( get_option( 'woocommerce-csvupdate-ignore-first-row',  intval(@$_POST['ignore-first-row']) ) );
-	$csv_delimiter_tab	= intval( get_option( 'woocommerce-csvupdate-csv-delimiter-tab',  intval(@$_POST['csv-delimiter-tab']) ) );
-	$discount  		 			= floatval( get_option( 'woocommerce-csvupdate-discount',  floatval(@$_POST['discount']) ) );
-	$sku_mask  		 			= get_option( 'woocommerce-csvupdate-sku-mask',  @$_POST['sku-mask'] );
-	$sku_mask_replace		= get_option( 'woocommerce-csvupdate-sku-mask-replace',  @$_POST['sku-mask-replace'] );
-
-	//--------------------------------------------------------------
 	// :: Subir archivo
 	//--------------------------------------------------------------
 	$target_dir = WP_CONTENT_DIR .  '/uploads/csv/';
@@ -77,274 +59,152 @@ if( isset($_GET['do-it']) ){
 	}
 
 	// Mover archivo subido
-  if (move_uploaded_file($_FILES["csv-file"]["tmp_name"], $target_file)) {
+  if (@move_uploaded_file($_FILES["csv-file"]["tmp_name"], $target_file)) {
       $upload_error = false;
   } else {
       $upload_error = true;
   }
 
+	// Count the number of lines
+	$line_count = 0;
+	$handle = fopen($target_file, "r");
+	while(!feof($handle)){
+	  $line = fgets($handle);
+	  $line_count++;
+	}
+	fclose($handle);
+
 	//--------------------------------------------------------------
 	// :: Procesar
 	//--------------------------------------------------------------
-	if( !$upload_error ){
+	if( !$upload_error ){ ?>
 
-		// Se subió el archivo, algo hicimos
-		$exito = true;
-
-		// Iniciar LOG
-		$_log = '';
-
-		// Leo el archivo a un array
-		$hw_file = file( $target_file );
-		$num_linea = 0;
-		$productos_encontrados = 0;
-		$productos_actualizados_precio = 0;
-		$productos_actualizados_stock = 0;
-		$productos_actualizados_titulo = 0;
-		$productos_no_importados = 0;
-		$productos_nuevos = 0;
-
-		// Recorro linea a línea y convierto a array el CSV
-		foreach ($hw_file as $linea) {
-
-			// Obtengo la línea del csv reemplazando comas por puntos en números
-			$csv_delimiter = $csv_delimiter_tab ? "\t" : $csv_delimiter;
-			$__detect_encod = mb_detect_encoding($linea, mb_detect_order(), true);
-			if( $__detect_encod ){
-				// Se detectó algún encoding. No importa cual, convertir a UTF-8
-				$linea = iconv($__detect_encod, "UTF-8", $linea);
-			} else {
-				// NO se pudo detectar un encoding. Intentar convertir de todas formas
-				$linea = utf8_encode( $linea );
+		<style media="screen">
+			#update-progress{
+				display: block;
+				height: 30px;
+				background: #38d012;
+				width: 0%;
 			}
-			$csv_linea = str_getcsv( $linea, $csv_delimiter );
-			$num_linea++;
+		</style>
 
-			if( $ignore_first_row && $num_linea == 1 ){
-				// Ignorar primera línea
-				continue;
-			}
+		<div class="wrap">
+			<div id="update-result">
 
-			// Nuevos valores para el productow
-			$sku 							= @$csv_linea[ $column_sku ];
-			$precio 					= @floatval(str_replace(',','',trim($csv_linea[ $column_price ])));
-			// $precio 					= str_replace( '.', ',', $precio );
-			$precio_descuento = @$precio;
-			$stock  					= @intval(str_replace(',','',trim($csv_linea[ $column_stock ])));
-			// $stock	 					= str_replace( '.', ',', $stock );
-			$title  					= @trim($csv_linea[ $column_title ]);
-			$category 				= @trim($csv_linea[ $column_category ]);
-			$subcategory			= @trim($csv_linea[ $column_subcategory ]);
+			</div>
+			<div id="update-progress">
+			</div>
+		</div>
 
-			// Aplica descuento?
-			if( $apply_discount ){
-				$precio_descuento = ( (100-$discount)/100 )*$precio;
-			}
+		<script type="text/javascript">
+			// Realizamos la importación por AJAX
+			// Construir la data necesaria para pasar al archivo
+			var url = '<?php echo plugin_dir_url(__FILE__); ?>/ajax-import-item.php';
+			var line_count = <?php echo $line_count; ?>;
+			var item_count = 0;
+			var percent_done = 0;
+			<?php
+				// Archivo log
+				$log_name = 'csv_import_log_' . date('Y-m-d_H-i-s') . '.txt';
+				$_wp_upload = wp_upload_dir();
+				$log_url = $_wp_upload['baseurl'] . '/csv/' . $log_name;
+			?>
+			var log_url = '<?php echo $log_url; ?>';
+			var ajax_data = {
+				target_dir: '<?php echo $target_dir; ?>',
+				target_file: '<?php echo $target_file; ?>',
+				log_file: '<?php echo $target_dir . $log_name; ?>',
+				file_line: 0,
+			};
+			var result_data = {
+				productos_encontrados: 0,
+				productos_actualizados_precio: 0,
+				productos_actualizados_stock: 0,
+				productos_actualizados_titulo: 0,
+				productos_no_importados: 0,
+				productos_nuevos: 0,
+			};
 
-			// Necesito aplicarle una máscara al SKU
-			if( $sku_mask ){
-				// Aplicar máscara al SKU
-				$sku = preg_replace( "/". $sku_mask ."/", $sku_mask_replace, $sku );
+			(function($){
+				var $update_result = $('#update-result');
+				var $update_progress = $('#update-progress');
 
-			}
+				function update_item(){
 
-			// Busco el producto por SKU
-			if ($sku) {
-				// Obtengo el ID del producto
-				$product_id = wc_get_product_id_by_sku( $sku );
+					// increment item
+					item_count++;
+					percent_done = parseInt((item_count*100)/line_count);
 
-				if( $product_id ){
-					// Obtener producto
-					$_product = wc_get_product( $product_id );
+					if( item_count <= line_count){
 
-					// El producto existe
-					$productos_encontrados++;
+						// Update progress
+						$update_progress.css('width', percent_done + "%");
+						_resultado = 'Procesando ' + item_count + ' de ' + line_count + ' (' + percent_done + '%)';
+						_resultado += '<br><strong>Productos encontrados: </strong>' + result_data.productos_encontrados;
+						_resultado += '<br><strong>Productos nuevos: </strong>' + result_data.productos_nuevos;
+						_resultado += '<br><strong>Productos ignorados: </strong>' + result_data.productos_no_importados;
+						_resultado += '<br><strong>Productos con nuevo precio: </strong>' + result_data.productos_actualizados_precio;
+						_resultado += '<br><strong>Productos con nuevo stock: </strong>' + result_data.productos_actualizados_stock;
+						$update_result.html(_resultado);
 
-					$hice_cambios_en_este_producto = array();
+						// Enviar al script que hace la actualización
+						ajax_data.file_line++;
+						$.ajax({
+		          url: url,
+		          type: 'post',
+		          data: ajax_data,
+		          dataType: 'json'
+		        }).fail(function(data){
 
-					// Actualizar precio ?
-					if( floatval($_product->get_regular_price()) != floatval($precio) ){
-						$productos_actualizados_precio++;
-						$hice_cambios_en_este_producto[] = 'precio';
-						$hice_cambios_en_este_producto['precio_viejo'] = $_product->get_price();
-						if( $apply_discount ){
-							wcsvu_change_price_by_type( $product_id, $precio_descuento ,'price' );
-							wcsvu_change_price_by_type( $product_id, $precio ,'regular_price' );
-							wcsvu_change_price_by_type( $product_id, $precio_descuento ,'sale_price' );
-						} else {
-							wcsvu_change_price_by_type( $product_id, $precio ,'price' );
-							wcsvu_change_price_by_type( $product_id, $precio ,'regular_price' );
-							wcsvu_change_price_by_type( $product_id, $precio ,'sale_price' );
-						}
-					}
-					// Actualizar stock ?
-					if( intval($_product->get_stock_quantity()) != intval($stock) ){
-						$productos_actualizados_stock++;
-						$hice_cambios_en_este_producto[] = 'stock';
-						$hice_cambios_en_este_producto['stock_viejo'] = $_product->get_stock_quantity();
-						update_post_meta( $product_id, '_manage_stock', 'yes');
-						wc_update_product_stock( $product_id, $stock );
-					}
+							// En caso de fallar seguimos intentando
+							update_item();
 
-					// Actualizar título ?
-					// if( trim($title) && ( floatval( trim($_product->get_title()) != trim($title) ) ) ){
-					// 	$productos_actualizados_titulo++;
-					// 	$hice_cambios_en_este_producto[] = 'titulo';
-					// 	$hice_cambios_en_este_producto['titulo_viejo'] = $_product->get_title();
-					// 	$product_new_title = array(
-					//       'ID'           => $product_id,
-					//       'post_title'   => $title,
-					//   );
-					//   wp_update_post( $product_new_title );
-					// }
+		        }).done(function(data){
+							// Agrego el resultado
+							result_data.productos_encontrados += parseInt( data.productos_encontrados ),
+							result_data.productos_actualizados_precio += parseInt( data.productos_actualizados_precio ),
+							result_data.productos_actualizados_stock += parseInt( data.productos_actualizados_stock ),
+							result_data.productos_actualizados_titulo += parseInt( data.productos_actualizados_titulo ),
+							result_data.productos_no_importados += parseInt( data.productos_no_importados ),
+							result_data.productos_nuevos += parseInt( data.productos_nuevos ),
 
-					// Limpiar transitiens
-					wc_delete_product_transients( $product_id );
+							// Recursión
+							update_item();
 
-
-					// Log info
-					if( !empty( $hice_cambios_en_este_producto ) ){
-						$_log .= "ACTUALIZADO -----------------------------------------------------------";
-						$_log .= "-----------------------------------------------------------------------------\n";
-						$_log .= "(".$sku.")" . "\n";
-						if( in_array('titulo', $hice_cambios_en_este_producto) ){
-							$_log .= __('Title', 'woocommerce-csvupdate') . ": " . $hice_cambios_en_este_producto['titulo_viejo'] . " ---> " . $title . "\n";
-						}
-						if( in_array('precio', $hice_cambios_en_este_producto) ){
-							$_log .= __('Price', 'woocommerce-csvupdate') . ": $" . $hice_cambios_en_este_producto['precio_viejo'] . " ---> $" . $precio . "\n";
-						}
-						if( in_array('stock', $hice_cambios_en_este_producto) ){
-							$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $hice_cambios_en_este_producto['stock_viejo'] . " ---> " . $stock . "\n";
-						}
-						$_log .= "-----------------------------------------------------------";
-						$_log .= "-----------------------------------------------------------------------------\n";
-					}
-
-
-				} else {
-					// El producto no existe
-					if( ($stock > 0) && $precio && $insert_new ){
-						// El producto nuevo tiene stock y se pidió agregar nuevos
-						//-------------------------------------------------
-						// INSERTAR
-						//-------------------------------------------------
-
-						// Obtengo la categoría
-						$cat_id = false;
-						$cat_obj = get_term_by('name', $category, 'product_cat');
-						if( $cat_obj ){
-							// La categoría ya existe
-							$cat_id = $cat_obj->term_id;
-						} else {
-							// La categoría no existe
-							if( $category ){
-								// Crear categoria
-								$cat_obj = wp_insert_term( $category, 'product_cat' );
-								if( is_array($cat_obj) ){
-									$cat_id = $cat_obj['term_id'];
-								} else{
-									// Ocurrió un error. Tal vez ya existe?
-									// HACER ALGO
-								}
-							}
-						}
-						// Obtengo la SUB categoría
-						$subcat_id = false;
-						// $subcat_obj = get_term_by('name', $subcategory, 'product_cat');
-
-						if( $subcategory ){
-							// USO wp_insert_term para buscar. Si devuelve error: EXISTE; SI NO, LA CREA
-							$subcat_obj = wp_insert_term( $subcategory, 'product_cat', array( 'parent' => $cat_id ) );
-
-							if( is_wp_error($subcat_obj) ){
-								// Ya existía
-								$subcat_id = $subcat_obj->error_data['term_exists'];
-							} else {
-								// Es nueva
-								$subcat_id = $subcat_obj['term_id'];
-							}
-						}
-
-						// Creo el producto
-						$post = array(
-					    'post_author' => get_current_user_id(),
-					    'post_content' => '',
-					    'post_status' => "publish",
-					    'post_title' => $title,
-					    'post_parent' => '',
-					    'post_type' => "product",
-						);
-
-						//Create post
-						$newproduct_id = wp_insert_post( $post, true );
-
-						if( is_wp_error($newproduct_id) ){
-							$_log .= "ERROR!!!! -----------------------------------------------------------";
-							$_log .= "-----------------------------------------------------------------------------\n";
-							$_log .= "(".$sku.") :: NO SE PUDO GUARDAR EN LA BASE DE DATOS";
-							$_log .= "-----------------------------------------------------------";
-							$_log .= "-----------------------------------------------------------------------------\n";
-							// El producto nuevo no se pudo insertar
-							$productos_no_importados++;
-						} else {
-							// Tipo de producto (SIMPLE)
-							wp_set_object_terms( $newproduct_id, 'simple', 'product_type');
-
-							// Terms
-							if( $cat_id )
-								wp_set_object_terms( $newproduct_id, intval($cat_id), 'product_cat' );
-							if( $subcat_id )
-								wp_set_object_terms( $newproduct_id, intval($subcat_id), 'product_cat', true );
-
-							// Meta
-							update_post_meta( $newproduct_id, '_visibility', 'visible' );
-							update_post_meta( $newproduct_id, '_stock_status', 'instock');
-							update_post_meta( $newproduct_id, '_manage_stock', 'yes');
-							update_post_meta( $newproduct_id, 'total_sales', '0');
-							update_post_meta( $newproduct_id, '_downloadable', 'no');
-							update_post_meta( $newproduct_id, '_virtual', 'no');
-							update_post_meta( $newproduct_id, '_sku', $sku);
-
-							// Actualizar precio
-							// Aplica descuento?
-							if( $apply_discount ){
-								wcsvu_change_price_by_type( $newproduct_id, $precio_descuento ,'price' );
-								wcsvu_change_price_by_type( $newproduct_id, $precio ,'regular_price' );
-								wcsvu_change_price_by_type( $newproduct_id, $precio_descuento ,'sale_price' );
-							} else {
-								wcsvu_change_product_price( $newproduct_id, $precio );
-							}
-							// Actualizar stock
-							wc_update_product_stock( $newproduct_id, $stock );
-
-
-							// Log info
-							$_log .= "NUEVO -----------------------------------------------------------";
-							$_log .= "-----------------------------------------------------------------------------\n";
-							$_log .= "(".$sku.") :: " . $title . "\n";
-							$_log .= __('Price', 'woocommerce-csvupdate') . ": $" . $precio . " | ";
-							$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $stock . "\n";
-							$_log .= __('Category', 'woocommerce-csvupdate') . ": " . $category . "\n";
-							$_log .= __('Sub-Category', 'woocommerce-csvupdate') . ": " . $subcategory . "\n";
-							$_log .= "-----------------------------------------------------------";
-							$_log .= "-----------------------------------------------------------------------------\n";
-
-							// Incrementar contador
-							$productos_nuevos++;
-						}
+		        });
 					} else {
-						// El producto nuevo no tiene stock
-						$productos_no_importados++;
+
+						// Finalizado!
+						$update_progress.css('width', "100%");
+						_resultado = '<strong>FINALIZADO</strong>';
+						_resultado += '<br><strong>Productos encontrados (ya existentes): </strong>' + result_data.productos_encontrados;
+						_resultado += '<br><strong>Productos nuevos: </strong>' + result_data.productos_nuevos;
+						_resultado += '<br><strong>Productos ignorados: </strong>' + result_data.productos_no_importados;
+						_resultado += '<br><strong>Productos con nuevo precio: </strong>' + result_data.productos_actualizados_precio;
+						_resultado += '<br><strong>Productos con nuevo stock: </strong>' + result_data.productos_actualizados_stock;
+						$update_result.html(_resultado);
+						$update_result.append('<br><a class="button button button-primary" href="'+log_url+'" target="_blank">Ver registro</a><br>');
 					}
 				}
 
-			} // if $sku
+				// Llamamos la primera instancia
+				update_item();
 
-		} // hwdfile as linea
+			})(jQuery);
+		</script>
 
-	} // if !$upload_error
+	<?php } // if !$upload_error
+	else { ?>
+
+		<div class="wrap">
+			<div class="error notice is-dismissible"><p><?php _e('There was an error uploading the file.', 'woocommerce-csvupdate'); ?></p></div>
+			<p><a href="<?php menu_page_url('woocommerce-csvupdate/woocommerce-csvupdate-do.php'); ?>">&larr; Volver</a></p>
+		</div>
+
+	<?php } // if !$upload_error
 
 } //isset($_GET['do-it'])
+else {
 
 ?>
 <div class="wrap">
@@ -361,11 +221,6 @@ if( isset($_GET['do-it']) ){
 			max-width: none;
 		}
 	</style>
-
-	<?php if( isset( $upload_error ) && $upload_error ): ?>
-		<div class="error notice is-dismissible"><p><?php _e('There was an error uploading the file.', 'woocommerce-csvupdate'); ?></p></div>
-	<?php endif; ?>
-
 	<?php if( isset( $exito ) && $exito ): ?>
 		<div class="updated notice is-dismissible"><p>
 			<?php echo sprintf( __('<strong>%s</strong> products were found. <strong>%s</strong> were inserted. <strong>%s</strong> were ignored.', 'woocommerce-csvupdate' ), $productos_encontrados, $productos_nuevos, $productos_no_importados ); ?>
@@ -376,9 +231,6 @@ if( isset($_GET['do-it']) ){
 		<div class="updated notice is-dismissible"><p>
 			<?php echo sprintf( __('<strong>%s</strong> products with new stock.', 'woocommerce-csvupdate' ), $productos_actualizados_stock); ?>
 		</p></div>
-		<!-- <div class="updated notice is-dismissible"><p>
-			<?php echo sprintf( __('<strong>%s</strong> products with new title.', 'woocommerce-csvupdate' ), $productos_actualizados_titulo); ?>
-		</p></div> -->
 	<?php else: ?>
 		<div class="error notice is-dismissible"><p><?php _e('<strong>WARNING</strong> - <em>Always</em> backup your database before uploading a file!', 'woocommerce-csvupdate'); ?></p></div>
 		<div class="error notice is-dismissible"><p><?php _e('<strong>WARNING</strong> - Check that the column numbers correspond with the ones in the CSV file!', 'woocommerce-csvupdate'); ?></p></div>
@@ -463,3 +315,4 @@ if( isset($_GET['do-it']) ){
 </script>
 
 </div> <!--.wrap-->
+<?php } //isset($_GET['do-it'])
