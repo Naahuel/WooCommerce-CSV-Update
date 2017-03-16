@@ -51,7 +51,7 @@
 
 		if( $ignore_first_row && intval($_POST['file_line']) == 1 ){
 			// Ignorar primera línea
-			continue;
+			die;
 		}
 
 		// Nuevos valores para el productow
