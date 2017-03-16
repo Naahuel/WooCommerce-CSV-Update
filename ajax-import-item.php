@@ -33,6 +33,31 @@
 	$productos_no_importados = 0;
 	$productos_nuevos = 0;
 
+	// Funcion para finalizar
+	function finalizar(){
+		global $productos_encontrados;
+		global $productos_actualizados_precio;
+		global $productos_actualizados_stock;
+		global $productos_actualizados_titulo;
+		global $productos_no_importados;
+		global $productos_nuevos;
+		global $_log;
+		// Mostrar resultado
+		echo json_encode(array(
+			'productos_encontrados' => $productos_encontrados,
+			'productos_actualizados_precio' => $productos_actualizados_precio,
+			'productos_actualizados_stock' => $productos_actualizados_stock,
+			'productos_actualizados_titulo' => $productos_actualizados_titulo,
+			'productos_no_importados' => $productos_no_importados,
+			'productos_nuevos' => $productos_nuevos,
+		));
+
+		// Agregar al log
+		file_put_contents( $_POST['log_file'] , $_log.PHP_EOL , FILE_APPEND | LOCK_EX);
+		// Terminar
+		die;
+	}
+
 	// Recorro linea a línea y convierto a array el CSV
 	// foreach ($hw_file as $linea) {
 	$linea = $hw_file[intval($_POST['file_line'])-1];
@@ -51,7 +76,7 @@
 
 		if( $ignore_first_row && intval($_POST['file_line']) == 1 ){
 			// Ignorar primera línea
-			die;
+			finalizar();
 		}
 
 		// Nuevos valores para el productow
@@ -259,15 +284,4 @@
 
 	// } // hwdfile as linea
 
-	// Mostrar resultado
-	echo json_encode(array(
-		'productos_encontrados' => $productos_encontrados,
-		'productos_actualizados_precio' => $productos_actualizados_precio,
-		'productos_actualizados_stock' => $productos_actualizados_stock,
-		'productos_actualizados_titulo' => $productos_actualizados_titulo,
-		'productos_no_importados' => $productos_no_importados,
-		'productos_nuevos' => $productos_nuevos,
-	));
-
-	// Agregar al log
-	file_put_contents( $_POST['log_file'] , $_log.PHP_EOL , FILE_APPEND | LOCK_EX);
+	finalizar();
