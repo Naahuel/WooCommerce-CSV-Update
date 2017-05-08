@@ -53,7 +53,9 @@
 		));
 
 		// Agregar al log
-		file_put_contents( $_POST['log_file'] , $_log.PHP_EOL , FILE_APPEND | LOCK_EX);
+		if( $_log ){
+			file_put_contents( $_POST['log_file'] , $_log.PHP_EOL , FILE_APPEND | LOCK_EX);
+		}
 		// Terminar
 		die;
 	}
