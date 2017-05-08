@@ -321,7 +321,7 @@
 						update_post_meta( $newproduct_id, '_weight', $peso);
 						update_post_meta( $newproduct_id, '_length', $largo);
 						update_post_meta( $newproduct_id, '_width', $ancho);
-						update_post_meta( $newproduct_id, '_height', $height);
+						update_post_meta( $newproduct_id, '_height', $alto);
 
 						// Actualizar precio
 						// Aplica descuento?

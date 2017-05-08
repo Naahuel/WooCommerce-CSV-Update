@@ -78,7 +78,8 @@ if( isset($_GET['do-it']) ){
 	$handle = fopen($target_file, "r");
 	while(!feof($handle)){
 	  $line = fgets($handle);
-	  $line_count++;
+		if($line)
+	  	$line_count++;
 	}
 	fclose($handle);
 
