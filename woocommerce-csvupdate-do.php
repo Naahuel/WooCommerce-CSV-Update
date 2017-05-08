@@ -13,6 +13,14 @@ if( isset($_GET['do-it']) ){
 		{ update_option( 'woocommerce-csvupdate-column-price', intval($_POST['column-price']) ); }
 	if( isset( $_POST['column-stock'] ) )
 		{ update_option( 'woocommerce-csvupdate-column-stock', intval($_POST['column-stock']) ); }
+	if( isset( $_POST['column-peso'] ) )
+		{ update_option( 'woocommerce-csvupdate-column-peso', intval($_POST['column-peso']) ); }
+	if( isset( $_POST['column-largo'] ) )
+		{ update_option( 'woocommerce-csvupdate-column-largo', intval($_POST['column-largo']) ); }
+	if( isset( $_POST['column-ancho'] ) )
+		{ update_option( 'woocommerce-csvupdate-column-ancho', intval($_POST['column-ancho']) ); }
+	if( isset( $_POST['column-alto'] ) )
+		{ update_option( 'woocommerce-csvupdate-column-alto', intval($_POST['column-alto']) ); }
 	if( isset( $_POST['column-title'] ) )
 		{ update_option( 'woocommerce-csvupdate-column-title', intval($_POST['column-title']) ); }
 	if( isset( $_POST['column-category'] ) )
@@ -120,6 +128,10 @@ if( isset($_GET['do-it']) ){
 				productos_encontrados: 0,
 				productos_actualizados_precio: 0,
 				productos_actualizados_stock: 0,
+				productos_actualizados_peso: 0,
+				productos_actualizados_largo: 0,
+				productos_actualizados_ancho: 0,
+				productos_actualizados_alto: 0,
 				productos_actualizados_titulo: 0,
 				productos_no_importados: 0,
 				productos_nuevos: 0,
@@ -145,6 +157,10 @@ if( isset($_GET['do-it']) ){
 						_resultado += '<br><strong>Productos ignorados: </strong>' + result_data.productos_no_importados;
 						_resultado += '<br><strong>Productos con nuevo precio: </strong>' + result_data.productos_actualizados_precio;
 						_resultado += '<br><strong>Productos con nuevo stock: </strong>' + result_data.productos_actualizados_stock;
+						_resultado += '<br><strong>Productos con nuevo peso: </strong>' + result_data.productos_actualizados_peso;
+						_resultado += '<br><strong>Productos con nuevo largo: </strong>' + result_data.productos_actualizados_largo;
+						_resultado += '<br><strong>Productos con nuevo ancho: </strong>' + result_data.productos_actualizados_ancho;
+						_resultado += '<br><strong>Productos con nuevo alto: </strong>' + result_data.productos_actualizados_alto;
 						$update_result.html(_resultado);
 
 						// Enviar al script que hace la actualización
@@ -164,6 +180,10 @@ if( isset($_GET['do-it']) ){
 							result_data.productos_encontrados += parseInt( data.productos_encontrados ),
 							result_data.productos_actualizados_precio += parseInt( data.productos_actualizados_precio ),
 							result_data.productos_actualizados_stock += parseInt( data.productos_actualizados_stock ),
+							result_data.productos_actualizados_peso += parseInt( data.productos_actualizados_peso ),
+							result_data.productos_actualizados_largo += parseInt( data.productos_actualizados_largo ),
+							result_data.productos_actualizados_ancho += parseInt( data.productos_actualizados_ancho ),
+							result_data.productos_actualizados_alto += parseInt( data.productos_actualizados_alto ),
 							result_data.productos_actualizados_titulo += parseInt( data.productos_actualizados_titulo ),
 							result_data.productos_no_importados += parseInt( data.productos_no_importados ),
 							result_data.productos_nuevos += parseInt( data.productos_nuevos ),
@@ -182,6 +202,10 @@ if( isset($_GET['do-it']) ){
 						_resultado += '<br><strong>Productos ignorados: </strong>' + result_data.productos_no_importados;
 						_resultado += '<br><strong>Productos con nuevo precio: </strong>' + result_data.productos_actualizados_precio;
 						_resultado += '<br><strong>Productos con nuevo stock: </strong>' + result_data.productos_actualizados_stock;
+						_resultado += '<br><strong>Productos con nuevo peso: </strong>' + result_data.productos_actualizados_peso;
+						_resultado += '<br><strong>Productos con nuevo largo: </strong>' + result_data.productos_actualizados_largo;
+						_resultado += '<br><strong>Productos con nuevo ancho: </strong>' + result_data.productos_actualizados_ancho;
+						_resultado += '<br><strong>Productos con nuevo alto: </strong>' + result_data.productos_actualizados_alto;
 						$update_result.html(_resultado);
 						$update_result.append('<br><a class="button button button-primary" href="'+log_url+'" target="_blank">Ver registro</a><br>');
 					}
@@ -255,6 +279,22 @@ else {
 	<p>
 		<label class="woocommerce-csvupdate-label" for="column-stock"><?php _e('Stock Column', 'woocommerce-csvupdate'); ?></label>
 		<input class="woocommerce-csvupdate-input" type="text" name="column-stock" id="column-stock" value="<?php echo get_option( 'woocommerce-csvupdate-column-stock', '11' ); ?>">
+	</p>
+	<p>
+		<label class="woocommerce-csvupdate-label" for="column-peso"><?php _e('Weight Column', 'woocommerce-csvupdate'); ?></label>
+		<input class="woocommerce-csvupdate-input" type="text" name="column-peso" id="column-peso" value="<?php echo get_option( 'woocommerce-csvupdate-column-peso', '99' ); ?>">
+	</p>
+	<p>
+		<label class="woocommerce-csvupdate-label" for="column-largo"><?php _e('Length Column', 'woocommerce-csvupdate'); ?></label>
+		<input class="woocommerce-csvupdate-input" type="text" name="column-largo" id="column-largo" value="<?php echo get_option( 'woocommerce-csvupdate-column-largo', '99' ); ?>">
+	</p>
+	<p>
+		<label class="woocommerce-csvupdate-label" for="column-ancho"><?php _e('Width Column', 'woocommerce-csvupdate'); ?></label>
+		<input class="woocommerce-csvupdate-input" type="text" name="column-ancho" id="column-ancho" value="<?php echo get_option( 'woocommerce-csvupdate-column-ancho', '99' ); ?>">
+	</p>
+	<p>
+		<label class="woocommerce-csvupdate-label" for="column-alto"><?php _e('Height Column', 'woocommerce-csvupdate'); ?></label>
+		<input class="woocommerce-csvupdate-input" type="text" name="column-alto" id="column-alto" value="<?php echo get_option( 'woocommerce-csvupdate-column-alto', '99' ); ?>">
 	</p>
 	<p>
 		<label class="woocommerce-csvupdate-label" for="column-title"><?php _e('Title Column <br><small>Only used when inserting new products</small>', 'woocommerce-csvupdate'); ?></label>

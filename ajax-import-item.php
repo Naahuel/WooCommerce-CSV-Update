@@ -10,6 +10,10 @@
 	$column_sku   			= intval( get_option( 'woocommerce-csvupdate-column-sku',    intval(@$_POST['column-sku']) ) ) - 1;
 	$column_price 			= intval( get_option( 'woocommerce-csvupdate-column-price',  intval(@$_POST['column-price']) ) ) - 1;
 	$column_stock  			= intval( get_option( 'woocommerce-csvupdate-column-stock',  intval(@$_POST['column-stock']) ) ) - 1;
+	$column_peso  			= intval( get_option( 'woocommerce-csvupdate-column-peso',  intval(@$_POST['column-peso']) ) ) - 1;
+	$column_largo  			= intval( get_option( 'woocommerce-csvupdate-column-largo',  intval(@$_POST['column-largo']) ) ) - 1;
+	$column_ancho  			= intval( get_option( 'woocommerce-csvupdate-column-ancho',  intval(@$_POST['column-ancho']) ) ) - 1;
+	$column_alto  			= intval( get_option( 'woocommerce-csvupdate-column-alto',  intval(@$_POST['column-alto']) ) ) - 1;
 	$column_title  			= intval( get_option( 'woocommerce-csvupdate-column-title',  intval(@$_POST['column-stock']) ) ) - 1;
 	$column_category  	= intval( get_option( 'woocommerce-csvupdate-column-category',  intval(@$_POST['column-stock']) ) ) - 1;
 	$column_subcategory	= intval( get_option( 'woocommerce-csvupdate-column-subcategory',  intval(@$_POST['column-stock']) ) ) - 1;
@@ -29,6 +33,10 @@
 	$productos_encontrados = 0;
 	$productos_actualizados_precio = 0;
 	$productos_actualizados_stock = 0;
+	$productos_actualizados_peso = 0;
+	$productos_actualizados_largo = 0;
+	$productos_actualizados_ancho = 0;
+	$productos_actualizados_alto = 0;
 	$productos_actualizados_titulo = 0;
 	$productos_no_importados = 0;
 	$productos_nuevos = 0;
@@ -38,6 +46,10 @@
 		global $productos_encontrados;
 		global $productos_actualizados_precio;
 		global $productos_actualizados_stock;
+		global $productos_actualizados_peso;
+		global $productos_actualizados_largo;
+		global $productos_actualizados_ancho;
+		global $productos_actualizados_alto;
 		global $productos_actualizados_titulo;
 		global $productos_no_importados;
 		global $productos_nuevos;
@@ -47,6 +59,10 @@
 			'productos_encontrados' => $productos_encontrados,
 			'productos_actualizados_precio' => $productos_actualizados_precio,
 			'productos_actualizados_stock' => $productos_actualizados_stock,
+			'productos_actualizados_peso' => $productos_actualizados_peso,
+			'productos_actualizados_largo' => $productos_actualizados_largo,
+			'productos_actualizados_ancho' => $productos_actualizados_ancho,
+			'productos_actualizados_alto' => $productos_actualizados_alto,
 			'productos_actualizados_titulo' => $productos_actualizados_titulo,
 			'productos_no_importados' => $productos_no_importados,
 			'productos_nuevos' => $productos_nuevos,
@@ -87,6 +103,10 @@
 		// $precio 					= str_replace( '.', ',', $precio );
 		$precio_descuento = @$precio;
 		$stock  					= @intval(str_replace(',','',trim($csv_linea[ $column_stock ])));
+		$peso  						= @floatval(str_replace(',','',trim($csv_linea[ $column_peso ])));
+		$largo  					= @floatval(str_replace(',','',trim($csv_linea[ $column_largo ])));
+		$ancho  					= @floatval(str_replace(',','',trim($csv_linea[ $column_ancho ])));
+		$alto  						= @floatval(str_replace(',','',trim($csv_linea[ $column_alto ])));
 		// $stock	 					= str_replace( '.', ',', $stock );
 		$title  					= @trim($csv_linea[ $column_title ]);
 		$category 				= @trim($csv_linea[ $column_category ]);
@@ -133,6 +153,7 @@
 						wcsvu_change_price_by_type( $product_id, $precio ,'sale_price' );
 					}
 				}
+
 				// Actualizar stock ?
 				if( intval($_product->get_stock_quantity()) != intval($stock) ){
 					$productos_actualizados_stock++;
@@ -146,6 +167,38 @@
 						update_post_meta( $newproduct_id, '_stock_status', 'outofstock');
 					}
 				}
+
+				// Actualizar weight ?
+				if( floatval($peso) && ( floatval($_product->get_weight()) != floatval($peso) ) ){
+					$productos_actualizados_peso++;
+					$hice_cambios_en_este_producto[] = 'peso';
+					$hice_cambios_en_este_producto['peso_viejo'] = $_product->get_weight();
+					$_product->set_weight($peso);
+				}
+				// Actualizar largo ?
+				if( floatval($largo) && ( floatval($_product->get_length()) != floatval($largo) ) ){
+					$productos_actualizados_largo++;
+					$hice_cambios_en_este_producto[] = 'largo';
+					$hice_cambios_en_este_producto['largo_viejo'] = $_product->get_length();
+					$_product->set_length($largo);
+				}
+				// Actualizar ancho ?
+				if( floatval($ancho) && ( floatval($_product->get_width()) != floatval($ancho) ) ){
+					$productos_actualizados_ancho++;
+					$hice_cambios_en_este_producto[] = 'ancho';
+					$hice_cambios_en_este_producto['ancho_viejo'] = $_product->get_width();
+					$_product->set_width($ancho);
+				}
+				// Actualizar alto ?
+				if( floatval($alto) && ( floatval($_product->get_height()) != floatval($alto) ) ){
+					$productos_actualizados_alto++;
+					$hice_cambios_en_este_producto[] = 'alto';
+					$hice_cambios_en_este_producto['alto_viejo'] = $_product->get_height();
+					$_product->set_height($alto);
+				}
+
+				// Guardar cambios
+				$_product->save();
 
 				// Limpiar transitiens
 				wc_delete_product_transients( $product_id );
@@ -164,6 +217,18 @@
 					}
 					if( in_array('stock', $hice_cambios_en_este_producto) ){
 						$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $hice_cambios_en_este_producto['stock_viejo'] . " ---> " . $stock . "\n";
+					}
+					if( in_array('peso', $hice_cambios_en_este_producto) ){
+						$_log .= __('Weight', 'woocommerce-csvupdate') . ": " . $hice_cambios_en_este_producto['peso_viejo'] . " ---> " . $peso . "\n";
+					}
+					if( in_array('largo', $hice_cambios_en_este_producto) ){
+						$_log .= __('Length', 'woocommerce-csvupdate') . ": " . $hice_cambios_en_este_producto['largo_viejo'] . " ---> " . $largo . "\n";
+					}
+					if( in_array('ancho', $hice_cambios_en_este_producto) ){
+						$_log .= __('Width', 'woocommerce-csvupdate') . ": " . $hice_cambios_en_este_producto['ancho_viejo'] . " ---> " . $ancho . "\n";
+					}
+					if( in_array('alto', $hice_cambios_en_este_producto) ){
+						$_log .= __('Height', 'woocommerce-csvupdate') . ": " . $hice_cambios_en_este_producto['alto_viejo'] . " ---> " . $alto . "\n";
 					}
 					$_log .= "-----------------------------------------------------------";
 					$_log .= "-----------------------------------------------------------------------------\n";
@@ -253,6 +318,10 @@
 						update_post_meta( $newproduct_id, '_downloadable', 'no');
 						update_post_meta( $newproduct_id, '_virtual', 'no');
 						update_post_meta( $newproduct_id, '_sku', $sku);
+						update_post_meta( $newproduct_id, '_weight', $peso);
+						update_post_meta( $newproduct_id, '_length', $largo);
+						update_post_meta( $newproduct_id, '_width', $ancho);
+						update_post_meta( $newproduct_id, '_height', $height);
 
 						// Actualizar precio
 						// Aplica descuento?
@@ -273,6 +342,10 @@
 						$_log .= "(".$sku.") :: " . $title . "\n";
 						$_log .= __('Price', 'woocommerce-csvupdate') . ": $" . $precio . " | ";
 						$_log .= __('Stock', 'woocommerce-csvupdate') . ": " . $stock . "\n";
+						$_log .= __('Weight', 'woocommerce-csvupdate') . ": " . $peso . "\n";
+						$_log .= __('Length', 'woocommerce-csvupdate') . ": " . $largo . "\n";
+						$_log .= __('Width', 'woocommerce-csvupdate') . ": " . $ancho . "\n";
+						$_log .= __('Height', 'woocommerce-csvupdate') . ": " . $alto . "\n";
 						$_log .= __('Category', 'woocommerce-csvupdate') . ": " . $category . "\n";
 						$_log .= __('Sub-Category', 'woocommerce-csvupdate') . ": " . $subcategory . "\n";
 						$_log .= "-----------------------------------------------------------";
