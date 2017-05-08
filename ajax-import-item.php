@@ -140,6 +140,11 @@
 					$hice_cambios_en_este_producto['stock_viejo'] = $_product->get_stock_quantity();
 					update_post_meta( $product_id, '_manage_stock', 'yes');
 					wc_update_product_stock( $product_id, $stock );
+					if( intval($stock) > 0 ){
+						update_post_meta( $newproduct_id, '_stock_status', 'instock');
+					} else {
+						update_post_meta( $newproduct_id, '_stock_status', 'outofstock');
+					}
 				}
 
 				// Limpiar transitiens
