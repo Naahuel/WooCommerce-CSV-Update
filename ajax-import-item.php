@@ -98,19 +98,19 @@
 		}
 
 		// Nuevos valores para el productow
-		$sku 							= @$csv_linea[ $column_sku ];
-		$precio 					= @floatval(str_replace(',','',trim($csv_linea[ $column_price ])));
+		$sku 							= isset($csv_linea[ $column_sku ])? @$csv_linea[ $column_sku ] : FALSE;
+		$precio 					= isset($csv_linea[ $column_price ])? @floatval(str_replace(',','',trim($csv_linea[ $column_price ]))) : FALSE;
 		// $precio 					= str_replace( '.', ',', $precio );
 		$precio_descuento = @$precio;
-		$stock  					= @intval(str_replace(',','',trim($csv_linea[ $column_stock ])));
-		$peso  						= @floatval(str_replace(',','',trim($csv_linea[ $column_peso ])));
-		$largo  					= @floatval(str_replace(',','',trim($csv_linea[ $column_largo ])));
-		$ancho  					= @floatval(str_replace(',','',trim($csv_linea[ $column_ancho ])));
-		$alto  						= @floatval(str_replace(',','',trim($csv_linea[ $column_alto ])));
+		$stock  					= isset($csv_linea[ $column_stock ])? @intval(str_replace(',','',trim($csv_linea[ $column_stock ]))) : FALSE;
+		$peso  						= isset($csv_linea[ $column_peso ])? @floatval(str_replace(',','',trim($csv_linea[ $column_peso ]))) : FALSE;
+		$largo  					= isset($csv_linea[ $column_largo ])? @floatval(str_replace(',','',trim($csv_linea[ $column_largo ]))) : FALSE;
+		$ancho  					= isset($csv_linea[ $column_ancho ])? @floatval(str_replace(',','',trim($csv_linea[ $column_ancho ]))) : FALSE;
+		$alto  						= isset($csv_linea[ $column_alto ])? @floatval(str_replace(',','',trim($csv_linea[ $column_alto ]))) : FALSE;
 		// $stock	 					= str_replace( '.', ',', $stock );
-		$title  					= @trim($csv_linea[ $column_title ]);
-		$category 				= @trim($csv_linea[ $column_category ]);
-		$subcategory			= @trim($csv_linea[ $column_subcategory ]);
+		$title  					= isset($csv_linea[ $column_title ])? @trim($csv_linea[ $column_title ]) : FALSE;
+		$category 				= isset($csv_linea[ $column_category ])? @trim($csv_linea[ $column_category ]) : FALSE;
+		$subcategory			= isset($csv_linea[ $column_subcategory ])? @trim($csv_linea[ $column_subcategory ]) : FALSE;
 
 		// Aplica descuento?
 		if( $apply_discount ){
@@ -125,7 +125,7 @@
 		}
 
 		// Busco el producto por SKU
-		if ($sku) {
+		if ($sku !== FALSE) {
 			// Obtengo el ID del producto
 			$product_id = wc_get_product_id_by_sku( $sku );
 
@@ -139,7 +139,7 @@
 				$hice_cambios_en_este_producto = array();
 
 				// Actualizar precio ?
-				if( floatval($precio) && ( floatval($_product->get_regular_price()) != floatval($precio) ) ){
+				if( ($precio !== FALSE) && floatval($precio) && ( floatval($_product->get_regular_price()) != floatval($precio) ) ){
 					$productos_actualizados_precio++;
 					$hice_cambios_en_este_producto[] = 'precio';
 					$hice_cambios_en_este_producto['precio_viejo'] = $_product->get_price();
@@ -155,7 +155,7 @@
 				}
 
 				// Actualizar stock ?
-				if( intval($_product->get_stock_quantity()) != intval($stock) ){
+				if( ($stock !== FALSE) && intval($_product->get_stock_quantity()) != intval($stock) ){
 					$productos_actualizados_stock++;
 					$hice_cambios_en_este_producto[] = 'stock';
 					$hice_cambios_en_este_producto['stock_viejo'] = $_product->get_stock_quantity();
@@ -169,28 +169,28 @@
 				}
 
 				// Actualizar weight ?
-				if( floatval($peso) && ( floatval($_product->get_weight()) != floatval($peso) ) ){
+				if( ($peso !== FALSE) && floatval($peso) && ( floatval($_product->get_weight()) != floatval($peso) ) ){
 					$productos_actualizados_peso++;
 					$hice_cambios_en_este_producto[] = 'peso';
 					$hice_cambios_en_este_producto['peso_viejo'] = $_product->get_weight();
 					$_product->set_weight($peso);
 				}
 				// Actualizar largo ?
-				if( floatval($largo) && ( floatval($_product->get_length()) != floatval($largo) ) ){
+				if( ($largo !== FALSE) && floatval($largo) && ( floatval($_product->get_length()) != floatval($largo) ) ){
 					$productos_actualizados_largo++;
 					$hice_cambios_en_este_producto[] = 'largo';
 					$hice_cambios_en_este_producto['largo_viejo'] = $_product->get_length();
 					$_product->set_length($largo);
 				}
 				// Actualizar ancho ?
-				if( floatval($ancho) && ( floatval($_product->get_width()) != floatval($ancho) ) ){
+				if( ($ancho !== FALSE) && floatval($ancho) && ( floatval($_product->get_width()) != floatval($ancho) ) ){
 					$productos_actualizados_ancho++;
 					$hice_cambios_en_este_producto[] = 'ancho';
 					$hice_cambios_en_este_producto['ancho_viejo'] = $_product->get_width();
 					$_product->set_width($ancho);
 				}
 				// Actualizar alto ?
-				if( floatval($alto) && ( floatval($_product->get_height()) != floatval($alto) ) ){
+				if( ($alto !== FALSE) && floatval($alto) && ( floatval($_product->get_height()) != floatval($alto) ) ){
 					$productos_actualizados_alto++;
 					$hice_cambios_en_este_producto[] = 'alto';
 					$hice_cambios_en_este_producto['alto_viejo'] = $_product->get_height();
