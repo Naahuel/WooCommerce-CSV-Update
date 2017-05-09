@@ -139,7 +139,7 @@
 				$hice_cambios_en_este_producto = array();
 
 				// Actualizar precio ?
-				if( floatval($_product->get_regular_price()) != floatval($precio) ){
+				if( floatval($precio) && ( floatval($_product->get_regular_price()) != floatval($precio) ) ){
 					$productos_actualizados_precio++;
 					$hice_cambios_en_este_producto[] = 'precio';
 					$hice_cambios_en_este_producto['precio_viejo'] = $_product->get_price();
@@ -160,11 +160,11 @@
 					$hice_cambios_en_este_producto[] = 'stock';
 					$hice_cambios_en_este_producto['stock_viejo'] = $_product->get_stock_quantity();
 					update_post_meta( $product_id, '_manage_stock', 'yes');
-					wc_update_product_stock( $product_id, $stock );
+					wc_update_product_stock( $product_id, intval($stock) );
 					if( intval($stock) > 0 ){
-						update_post_meta( $newproduct_id, '_stock_status', 'instock');
+						update_post_meta( $product_id, '_stock_status', 'instock');
 					} else {
-						update_post_meta( $newproduct_id, '_stock_status', 'outofstock');
+						update_post_meta( $product_id, '_stock_status', 'outofstock');
 					}
 				}
 
