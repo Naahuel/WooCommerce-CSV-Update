@@ -35,6 +35,10 @@ if( isset($_GET['do-it']) ){
 		{ update_option( 'woocommerce-csvupdate-apply-discount', intval($_POST['apply-discount']) ); }
 	else
 		{ update_option( 'woocommerce-csvupdate-apply-discount', 0 ); }
+	if( isset( $_POST['force-price-update'] ) )
+		{ update_option( 'woocommerce-csvupdate-force-price-update', intval($_POST['force-price-update']) ); }
+	else
+		{ update_option( 'woocommerce-csvupdate-force-price-update', 0 ); }
 	if( isset( $_POST['insert-new'] ) )
 		{ update_option( 'woocommerce-csvupdate-insert-new', intval($_POST['insert-new']) ); }
 	else
@@ -313,6 +317,10 @@ else {
 		<label class="woocommerce-csvupdate-label" for="apply-discount"><?php _e('Apply discount in % to all products?', 'woocommerce-csvupdate'); ?></label>
 		<input class="woocommerce-csvupdate-input" type="checkbox" name="apply-discount" id="apply-discount" value="1" <?php if( get_option( 'woocommerce-csvupdate-apply-discount', '0' ) == '1' ){ echo 'checked="checked"'; }; ?>>
 		<input class="woocommerce-csvupdate-input" type="number" name="discount" id="discount" value="<?php echo get_option( 'woocommerce-csvupdate-discount', '0' ); ?>"> %
+	</p>
+	<p>
+		<label class="woocommerce-csvupdate-label" for="force-price-update"><?php _e('Force price update?', 'woocommerce-csvupdate'); ?></label>
+		<input class="woocommerce-csvupdate-input" type="checkbox" name="force-price-update" id="force-price-update" value="1" <?php if( get_option( 'woocommerce-csvupdate-force-price-update', '0' ) == '1' ){ echo 'checked="checked"'; }; ?>>
 	</p>
 	<p>
 		<label class="woocommerce-csvupdate-label" for="insert-new"><?php _e('Add nonexistent products?', 'woocommerce-csvupdate'); ?></label>

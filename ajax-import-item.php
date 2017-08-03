@@ -18,6 +18,7 @@
 	$column_category  	= intval( get_option( 'woocommerce-csvupdate-column-category',  intval(@$_POST['column-stock']) ) ) - 1;
 	$column_subcategory	= intval( get_option( 'woocommerce-csvupdate-column-subcategory',  intval(@$_POST['column-stock']) ) ) - 1;
 	$apply_discount   	= intval( get_option( 'woocommerce-csvupdate-apply-discount',  intval(@$_POST['apply-discount']) ) );
+	$force_price_update	= intval( get_option( 'woocommerce-csvupdate-force-price-update',  intval(@$_POST['force-price-update']) ) );
 	$insert_new		 			= intval( get_option( 'woocommerce-csvupdate-insert-new',  intval(@$_POST['insert-new']) ) );
 	$ignore_first_row	  = intval( get_option( 'woocommerce-csvupdate-ignore-first-row',  intval(@$_POST['ignore-first-row']) ) );
 	$csv_delimiter_tab	= intval( get_option( 'woocommerce-csvupdate-csv-delimiter-tab',  intval(@$_POST['csv-delimiter-tab']) ) );
@@ -139,7 +140,7 @@
 				$hice_cambios_en_este_producto = array();
 
 				// Actualizar precio ?
-				if( ($precio !== FALSE) && floatval($precio) && ( floatval($_product->get_regular_price()) != floatval($precio) ) ){
+				if( $force_price_update || ( ($precio !== FALSE) && floatval($precio) && ( floatval($_product->get_regular_price()) != floatval($precio) ) ) ){
 					$productos_actualizados_precio++;
 					$hice_cambios_en_este_producto[] = 'precio';
 					$hice_cambios_en_este_producto['precio_viejo'] = $_product->get_price();
@@ -150,7 +151,7 @@
 					} else {
 						wcsvu_change_price_by_type( $product_id, $precio ,'price' );
 						wcsvu_change_price_by_type( $product_id, $precio ,'regular_price' );
-						wcsvu_change_price_by_type( $product_id, $precio ,'sale_price' );
+						wcsvu_change_price_by_type( $product_id, '' ,'sale_price' );
 					}
 				}
 
